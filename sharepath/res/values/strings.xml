@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SharePath</string>
+    <string name="request">New Request</string>
+    <string name="inbox">Inbox</string>
+    <string name="sent">Sent</string>
+    <string name="draft">Draft</string>
+    <string name="buddy">Buddy</string>
+    <string name="sharepath_service">SharePath Service</string>
+    <string name="sharepath_service_started">SharePath Service Started!</string>
+    <string name="sharepath_service_stopped">SharePath Service Stopped!</string>
+</resources>
