@@ -16,6 +16,10 @@
 
 package org.yexing.android.sharepath;
 
+import java.util.HashMap;
+
+import org.yexing.android.sharepath.domain.SharePath;
+
 import android.content.ContentProvider;
 import android.content.ContentProviderDatabaseHelper;
 import android.content.ContentURIParser;
@@ -28,7 +32,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ContentURI;
 import android.text.TextUtils;
 import android.util.Log;
-import java.util.HashMap;
 
 public class SharePathProvider extends ContentProvider {
 
@@ -36,12 +39,12 @@ public class SharePathProvider extends ContentProvider {
 
 	private static final String TAG = "SharePathProvider";
 	private static final String DATABASE_NAME = "sharepath.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
-	private static HashMap<String, String> NOTES_LIST_PROJECTION_MAP;
+	private static HashMap<String, String> MESSAGE_LIST_PROJECTION_MAP;
 
-	private static final int NOTES = 1;
-	private static final int NOTE_ID = 2;
+	private static final int MESSAGE = 1;
+	private static final int MESSAGE_ID = 2;
 
 	private static final ContentURIParser URL_MATCHER;
 
@@ -49,16 +52,17 @@ public class SharePathProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE notes (_id INTEGER PRIMARY KEY,"
-					+ "title TEXT," + "note TEXT," + "created INTEGER,"
-					+ "modified INTEGER" + ");");
+			db.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
+					+ "_type INTEGER," + "_from TEXT," + "_to TEXT,"
+					+ "_date INTEGER," + "_read INTEGER," + "_level INTEGER,"
+					+ "_center TEXT," + "_path TEXT" + ");");
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS notes");
+			db.execSQL("DROP TABLE IF EXISTS message");
 			onCreate(db);
 		}
 	}
@@ -77,13 +81,13 @@ public class SharePathProvider extends ContentProvider {
 		QueryBuilder qb = new QueryBuilder();
 
 		switch (URL_MATCHER.match(url)) {
-		case NOTES:
-			qb.setTables("notes");
-			qb.setProjectionMap(NOTES_LIST_PROJECTION_MAP);
+		case MESSAGE:
+			qb.setTables("message");
+			qb.setProjectionMap(MESSAGE_LIST_PROJECTION_MAP);
 			break;
 
-		case NOTE_ID:
-			qb.setTables("notes");
+		case MESSAGE_ID:
+			qb.setTables("message");
 			qb.appendWhere("_id=" + url.getPathSegment(1));
 			break;
 
@@ -94,7 +98,7 @@ public class SharePathProvider extends ContentProvider {
 		// If no sort order is specified use the default
 		String orderBy;
 		if (TextUtils.isEmpty(sort)) {
-			orderBy = NotePad.Notes.DEFAULT_SORT_ORDER;
+			orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
 		} else {
 			orderBy = sort;
 		}
@@ -108,11 +112,11 @@ public class SharePathProvider extends ContentProvider {
 	@Override
 	public String getType(ContentURI url) {
 		switch (URL_MATCHER.match(url)) {
-		case NOTES:
-			return "vnd.android.cursor.dir/vnd.google.note";
+		case MESSAGE:
+			return "vnd.android.cursor.dir/vnd.yexing.sharepath.message";
 
-		case NOTE_ID:
-			return "vnd.android.cursor.item/vnd.google.note";
+		case MESSAGE_ID:
+			return "vnd.android.cursor.item/vnd.yexing.sharepath.message";
 
 		default:
 			throw new IllegalArgumentException("Unknown URL " + url);
@@ -129,7 +133,7 @@ public class SharePathProvider extends ContentProvider {
 			values = new ContentValues();
 		}
 
-		if (URL_MATCHER.match(url) != NOTES) {
+		if (URL_MATCHER.match(url) != MESSAGE) {
 			throw new IllegalArgumentException("Unknown URL " + url);
 		}
 
@@ -137,26 +141,18 @@ public class SharePathProvider extends ContentProvider {
 		Resources r = Resources.getSystem();
 
 		// Make sure that the fields are all set
-		if (values.containsKey(NotePad.Notes.CREATED_DATE) == false) {
-			values.put(NotePad.Notes.CREATED_DATE, now);
+//		if (values.containsKey(SharePath.Message.DATE) == false) {
+//			values.put(SharePath.Message.DATE, now);
+//		}
+
+		if (values.containsKey(SharePath.Message.FROM) == false) {
+			values.put(SharePath.Message.FROM, "unknow");
 		}
 
-		if (values.containsKey(NotePad.Notes.MODIFIED_DATE) == false) {
-			values.put(NotePad.Notes.MODIFIED_DATE, now);
-		}
-
-		if (values.containsKey(NotePad.Notes.TITLE) == false) {
-			values.put(NotePad.Notes.TITLE, r
-					.getString(android.R.string.untitled));
-		}
-
-		if (values.containsKey(NotePad.Notes.NOTE) == false) {
-			values.put(NotePad.Notes.NOTE, "");
-		}
-
-		rowID = mDB.insert("notes", "note", values);
+		
+		rowID = mDB.insert("message", "_from", values);
 		if (rowID > 0) {
-			ContentURI uri = NotePad.Notes.CONTENT_URI.addId(rowID);
+			ContentURI uri = SharePath.Message.CONTENT_URI.addId(rowID);
 			getContext().getContentResolver().notifyChange(uri, null);
 			return uri;
 		}
@@ -166,43 +162,44 @@ public class SharePathProvider extends ContentProvider {
 
 	@Override
 	public int delete(ContentURI url, String where, String[] whereArgs) {
-		int count;
-		long rowId = 0;
-		switch (URL_MATCHER.match(url)) {
-		case NOTES:
-			count = mDB.delete("note_pad", where, whereArgs);
-			break;
-
-		case NOTE_ID:
-			String segment = url.getPathSegment(1);
-			rowId = Long.parseLong(segment);
-			count = mDB.delete("notes",
-					"_id="
-							+ segment
-							+ (!TextUtils.isEmpty(where) ? " AND (" + where
-									+ ')' : ""), whereArgs);
-			break;
-
-		default:
-			throw new IllegalArgumentException("Unknown URL " + url);
-		}
-
-		getContext().getContentResolver().notifyChange(url, null);
-		return count;
+		// int count;
+		// long rowId = 0;
+		// switch (URL_MATCHER.match(url)) {
+		// case NOTES:
+		// count = mDB.delete("note_pad", where, whereArgs);
+		// break;
+		//
+		// case NOTE_ID:
+		// String segment = url.getPathSegment(1);
+		// rowId = Long.parseLong(segment);
+		// count = mDB.delete("notes",
+		// "_id="
+		// + segment
+		// + (!TextUtils.isEmpty(where) ? " AND (" + where
+		// + ')' : ""), whereArgs);
+		// break;
+		//
+		// default:
+		// throw new IllegalArgumentException("Unknown URL " + url);
+		// }
+		//
+		// getContext().getContentResolver().notifyChange(url, null);
+		// return count;
+		return 0;
 	}
 
 	@Override
 	public int update(ContentURI url, ContentValues values, String where,
 			String[] whereArgs) {
-		int count;
+		 int count;
 		switch (URL_MATCHER.match(url)) {
-		case NOTES:
-			count = mDB.update("notes", values, where, whereArgs);
+		case MESSAGE:
+			count = mDB.update("message", values, where, whereArgs);
 			break;
 
-		case NOTE_ID:
+		case MESSAGE_ID:
 			String segment = url.getPathSegment(1);
-			count = mDB.update("notes", values,
+			count = mDB.update("message", values,
 					"_id="
 							+ segment
 							+ (!TextUtils.isEmpty(where) ? " AND (" + where
@@ -219,14 +216,14 @@ public class SharePathProvider extends ContentProvider {
 
 	static {
 		URL_MATCHER = new ContentURIParser(ContentURIParser.NO_MATCH);
-		URL_MATCHER.addURI("com.google.provider.NotePad", "notes", NOTES);
-		URL_MATCHER.addURI("com.google.provider.NotePad", "notes/#", NOTE_ID);
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"message", MESSAGE);
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"message/#", MESSAGE_ID);
 
-		NOTES_LIST_PROJECTION_MAP = new HashMap<String, String>();
-		NOTES_LIST_PROJECTION_MAP.put(NotePad.Notes._ID, "_id");
-		NOTES_LIST_PROJECTION_MAP.put(NotePad.Notes.TITLE, "title");
-		NOTES_LIST_PROJECTION_MAP.put(NotePad.Notes.NOTE, "note");
-		NOTES_LIST_PROJECTION_MAP.put(NotePad.Notes.CREATED_DATE, "created");
-		NOTES_LIST_PROJECTION_MAP.put(NotePad.Notes.MODIFIED_DATE, "modified");
+		MESSAGE_LIST_PROJECTION_MAP = new HashMap<String, String>();
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message._ID, "_id");
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM, "_from");
+
 	}
 }

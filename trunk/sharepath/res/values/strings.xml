@@ -9,4 +9,5 @@
     <string name="sharepath_service">SharePath Service</string>
     <string name="sharepath_service_started">SharePath Service Started!</string>
     <string name="sharepath_service_stopped">SharePath Service Stopped!</string>
+    <string name="unknow">unknow</string>
 </resources>
