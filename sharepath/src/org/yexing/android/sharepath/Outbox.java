@@ -11,12 +11,12 @@ import android.widget.SimpleCursorAdapter;
 
 import org.yexing.android.sharepath.domain.SharePath;
 
-public class Inbox extends ListActivity {
+public class Outbox extends ListActivity {
 	/**
 	 * The columns we are interested in from the database
 	 */
 	private static final String[] PROJECTION = new String[] {
-			SharePath.Message.FROM, SharePath.Message.TO };
+			SharePath.Message._ID, SharePath.Message.FROM };
 
 	/**
 	 * Cursor which holds list of all notes
@@ -33,12 +33,12 @@ public class Inbox extends ListActivity {
 		// setupListStripes();
 
 		mCursor = managedQuery(SharePath.Message.CONTENT_URI, PROJECTION,
-				"_type = 0", null, null);
+				"_type = 1", null, null);
 
 		// Used to map notes entries from the database to views
 		ListAdapter adapter = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_2, mCursor, new String[] {
-						SharePath.Message.FROM, SharePath.Message.TO },
+						SharePath.Message._ID, SharePath.Message.FROM },
 				new int[] { android.R.id.text1, android.R.id.text2 });
 		setListAdapter(adapter);
 	}

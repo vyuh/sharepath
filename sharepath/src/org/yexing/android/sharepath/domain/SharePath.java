@@ -27,6 +27,16 @@ public final class SharePath {
 	 * Message table
 	 */
 	public static final class Message implements BaseColumns {
+		public static final int TYPE_INDEX = 1;
+		public static final int FROM_INDEX = TYPE_INDEX + 1;
+		public static final int TO_INDEX = FROM_INDEX + 1;
+		public static final int DATE_INDEX = TO_INDEX + 1;
+		public static final int SENT_INDEX = DATE_INDEX + 1;
+		public static final int READ_INDEX = SENT_INDEX + 1;
+		public static final int LEVEL_INDEX = READ_INDEX + 1;
+		public static final int CENTER_INDEX = LEVEL_INDEX + 1;
+		public static final int PATH_INDEX = CENTER_INDEX + 1;
+		
 		/**
 		 * The content:// style URL for this table
 		 */
@@ -36,10 +46,10 @@ public final class SharePath {
 		/**
 		 * The default sort order for this table
 		 */
-		public static final String DEFAULT_SORT_ORDER = "_read ASC,_date DESC";
+		public static final String DEFAULT_SORT_ORDER = "_read ASC,_id DESC";
 
 		/**
-		 * The type of the message, 0:request 1:reply
+		 * The type of the message, 0:request 1:reply 2:record
 		 * <P>
 		 * Type: INTEGER
 		 * </P>
@@ -70,6 +80,14 @@ public final class SharePath {
 		 */
 		public static final String DATE = "_date";
 
+		/**
+		 * The sent flag 0:no 1:yes
+		 * <P>
+		 * Type: INTEGER
+		 * </P>
+		 */
+		public static final String SENT = "_sent";
+		
 		/**
 		 * The read flag 0:no 1:yes
 		 * <P>

@@ -39,7 +39,7 @@ public class SharePathProvider extends ContentProvider {
 
 	private static final String TAG = "SharePathProvider";
 	private static final String DATABASE_NAME = "sharepath.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 4;
 
 	private static HashMap<String, String> MESSAGE_LIST_PROJECTION_MAP;
 
@@ -52,10 +52,12 @@ public class SharePathProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
-					+ "_type INTEGER," + "_from TEXT," + "_to TEXT,"
-					+ "_date INTEGER," + "_read INTEGER," + "_level INTEGER,"
-					+ "_center TEXT," + "_path TEXT" + ");");
+			db
+					.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
+							+ "_type INTEGER," + "_from TEXT," + "_to TEXT,"
+							+ "_date INTEGER," + "_sent INTEGER,"
+							+ "_read INTEGER," + "_level INTEGER,"
+							+ "_center TEXT," + "_path TEXT" + ");");
 		}
 
 		@Override
@@ -141,15 +143,14 @@ public class SharePathProvider extends ContentProvider {
 		Resources r = Resources.getSystem();
 
 		// Make sure that the fields are all set
-//		if (values.containsKey(SharePath.Message.DATE) == false) {
-//			values.put(SharePath.Message.DATE, now);
-//		}
+		// if (values.containsKey(SharePath.Message.DATE) == false) {
+		// values.put(SharePath.Message.DATE, now);
+		// }
 
 		if (values.containsKey(SharePath.Message.FROM) == false) {
 			values.put(SharePath.Message.FROM, "unknow");
 		}
 
-		
 		rowID = mDB.insert("message", "_from", values);
 		if (rowID > 0) {
 			ContentURI uri = SharePath.Message.CONTENT_URI.addId(rowID);
@@ -162,36 +163,33 @@ public class SharePathProvider extends ContentProvider {
 
 	@Override
 	public int delete(ContentURI url, String where, String[] whereArgs) {
-		// int count;
-		// long rowId = 0;
-		// switch (URL_MATCHER.match(url)) {
-		// case NOTES:
-		// count = mDB.delete("note_pad", where, whereArgs);
-		// break;
-		//
-		// case NOTE_ID:
-		// String segment = url.getPathSegment(1);
-		// rowId = Long.parseLong(segment);
-		// count = mDB.delete("notes",
-		// "_id="
-		// + segment
-		// + (!TextUtils.isEmpty(where) ? " AND (" + where
-		// + ')' : ""), whereArgs);
-		// break;
-		//
-		// default:
-		// throw new IllegalArgumentException("Unknown URL " + url);
-		// }
-		//
-		// getContext().getContentResolver().notifyChange(url, null);
-		// return count;
-		return 0;
+		int count;
+		switch (URL_MATCHER.match(url)) {
+		case MESSAGE:
+			count = mDB.delete("message", where, whereArgs);
+			break;
+
+		case MESSAGE_ID:
+			String segment = url.getPathSegment(1);
+			count = mDB.delete("message",
+					"_id="
+							+ segment
+							+ (!TextUtils.isEmpty(where) ? " AND (" + where
+									+ ')' : ""), whereArgs);
+			break;
+
+		default:
+			throw new IllegalArgumentException("Unknown URL " + url);
+		}
+
+		getContext().getContentResolver().notifyChange(url, null);
+		return count;
 	}
 
 	@Override
 	public int update(ContentURI url, ContentValues values, String where,
 			String[] whereArgs) {
-		 int count;
+		int count;
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			count = mDB.update("message", values, where, whereArgs);
@@ -222,8 +220,16 @@ public class SharePathProvider extends ContentProvider {
 				"message/#", MESSAGE_ID);
 
 		MESSAGE_LIST_PROJECTION_MAP = new HashMap<String, String>();
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message._ID, "_id");
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM, "_from");
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message._ID, SharePath.Message._ID);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TYPE, SharePath.Message.TYPE);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM, SharePath.Message.FROM);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TO, SharePath.Message.TO);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.DATE, SharePath.Message.DATE);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.SENT, SharePath.Message.SENT);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.READ, SharePath.Message.READ);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.LEVEL, SharePath.Message.LEVEL);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.CENTER, SharePath.Message.CENTER);
+		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.PATH, SharePath.Message.PATH);
 
 	}
 }

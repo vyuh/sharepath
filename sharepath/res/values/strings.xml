@@ -2,7 +2,9 @@
 <resources>
     <string name="app_name">SharePath</string>
     <string name="request">New Request</string>
+    <string name="record">Record My Path</string>
     <string name="inbox">Inbox</string>
+    <string name="outbox">outbox</string>
     <string name="sent">Sent</string>
     <string name="draft">Draft</string>
     <string name="buddy">Buddy</string>
