@@ -28,7 +28,19 @@
                 <action android:value="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity class="Record" android:label="@string/record"
+        	android:theme="@style/Theme.Translucent">
+            <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
         <activity class="Inbox" android:label="@string/inbox"
+        	android:theme="@style/Theme.Translucent">
+            <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity class="Outbox" android:label="@string/outbox"
         	android:theme="@style/Theme.Translucent">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
