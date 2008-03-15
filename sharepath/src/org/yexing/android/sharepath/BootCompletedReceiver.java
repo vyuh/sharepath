@@ -1,11 +1,10 @@
 package org.yexing.android.sharepath;
 
-
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentReceiver;
 import android.util.Log;
+import android.widget.Toast;
 
 public class BootCompletedReceiver extends IntentReceiver {
 	private static final String LOG_TAG = "SharePath";
@@ -16,11 +15,7 @@ public class BootCompletedReceiver extends IntentReceiver {
         if (intent.getAction().equals(ACTION)) {
         	String info = "boot completed!";
             Log.i(LOG_TAG, info);
-            NotificationManager nm = (NotificationManager)context.getSystemService(
-                    Context.NOTIFICATION_SERVICE);
-
-            nm.notifyWithText(123, info,
-                    NotificationManager.LENGTH_LONG, null);
+            Toast.makeText(context, info, Toast.LENGTH_LONG).show();
 
             context.startService(new Intent(context, SharePathService.class), null);
         }

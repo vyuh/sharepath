@@ -9,8 +9,10 @@ import android.graphics.Path;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 import com.google.android.maps.MapActivity;
@@ -78,23 +80,23 @@ public class SharePathMap extends MapActivity {
 		zoomlevel = mv.getZoomLevel();
 
 		// overlay controller
-		oc = mv.createOverlayController();
+//		oc = mv.createOverlayController();
 
 		// 绘图界面
 		dv = new DrawableView(this);
 
-		// 增加显示路径的overlay
-		// oc = mv.createOverlayController();
-		// Log.d("xingye", "W:" + mv.right + " H:" + mv.bottom);
-		// po = new PathOverlay(dv.path, center, 0, 46, 480, 320);
-		// po.zoomlevel = zoomlevel;
-		// po.lastlevel = zoomlevel;
-		// oc.add(po, true);
+		 //增加显示路径的overlay
+		 oc = mv.createOverlayController();
+		 Log.d("SharePath", "W:" + mv.right + " H:" + mv.bottom);
+		 po = new PathOverlay(dv.path, center, 0, 46, 480, 320);
+		 po.zoomlevel = zoomlevel;
+		 po.lastlevel = zoomlevel;
+		 oc.add(po, true);
 
 		// Criteria cr = new Criteria();
 		instance = this;
 	}
-
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
@@ -116,35 +118,42 @@ public class SharePathMap extends MapActivity {
 			mv.invalidate();
 			break;
 		case KeyEvent.KEYCODE_M: //切换到地图界面
-			if (switcher == 1) {
-				po.path = dv.path;
-				po.center = mv.getMapCenter();
-				po.lastlevel = zoomlevel;
-				setContentView(mv);
-				switcher = 0;
+			if (mv.switcher == 1) {
+//				po.path = dv.path;
+//				po.center = mv.getMapCenter();
+//				po.lastlevel = zoomlevel;
+//				setContentView(mv);
+				mv.switcher = 0;
 			}
 
 			break;
 		case KeyEvent.KEYCODE_N: //切换到标图界面
-			if (switcher == 0) {
-				dv.left = width-mv.right;
-				dv.top = height-mv.bottom;
-				dv.path = po.showedPath;
-				oc.clear();
-				mv.invalidate();
-			//	po = null;
-				dv.b = mv.copyWindowBitmap();
-				center = mv.getMapCenter();
-				setContentView(dv);
-				switcher = 1;
+			int i = 1;
+			if (mv.switcher == 0) {
+//				Log.d("SharePath", "" + i++);
+//				dv.left = width-mv.right;
+//				dv.top = height-mv.bottom;
+//				Log.d("SharePath", "" + i++);
+//				dv.path = po.showedPath;
+//				Log.d("SharePath", "" + i++);
+////				oc.clear();
+////				mv.invalidate();
+//			//	po = null;
+//				//dv.b = mv.copyWindowBitmap();
+//				Log.d("SharePath", "" + i++);
+//				center = mv.getMapCenter();
+//				Log.d("SharePath", "" + i++);
+//				setContentView(dv);
+//				Log.d("SharePath", "" + i++);
+				mv.switcher = 1;
 			}
 			// dv.invalidate();
 			break;
 		case KeyEvent.KEYCODE_O:
-			showAlert("位置", "La:" + mv.getLatitudeSpan() + " Lo:"
+			showAlert("位置", 1, "La:" + mv.getLatitudeSpan() + " Lo:"
 					+ mv.getLongitudeSpan(), "OK", true);
 			Point pp = mv.getMapCenter();
-			showAlert("位置2", "La:" + pp.getLatitudeE6() + " Lo:"
+			showAlert("位置2", 1, "La:" + pp.getLatitudeE6() + " Lo:"
 					+ pp.getLongitudeE6(), "OK", true);
 			break;
 		case KeyEvent.KEYCODE_T:

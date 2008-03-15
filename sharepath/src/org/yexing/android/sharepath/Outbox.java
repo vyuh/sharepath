@@ -3,7 +3,7 @@ package org.yexing.android.sharepath;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListAdapter;
@@ -22,7 +22,7 @@ public class Outbox extends ListActivity {
 	 * Cursor which holds list of all notes
 	 */
 	private Cursor mCursor;
-	private ContentURI mURI;
+	private Uri mURI;
 
 	/** Called when the activity is first created. */
 	@Override
