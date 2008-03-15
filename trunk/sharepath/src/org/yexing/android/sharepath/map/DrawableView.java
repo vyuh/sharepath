@@ -42,7 +42,7 @@ public class DrawableView extends View {
 		}
 	}
 
-	@Override
+//	@Override
 	public boolean onMotionEvent(MotionEvent event) {
 		int action = event.getAction();
 		int x = (int) event.getX();

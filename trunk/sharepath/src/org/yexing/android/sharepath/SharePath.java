@@ -26,6 +26,12 @@ public class SharePath extends ListActivity {
 		List<Map> list = new ArrayList<Map>();
 		int index = 1;
 
+		addItem(list, index + ". test", activityIntent(
+				"org.yexing.android.sharepath",
+				"org.yexing.android.sharepath.Record"));
+		index++;
+		
+		
 		addItem(list, index + ". REQUEST", activityIntent(
 				"org.yexing.android.sharepath",
 				"org.yexing.android.sharepath.Request"));

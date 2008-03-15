@@ -14,13 +14,12 @@
             android:layout_height="wrap_content"
             android:text="FROM:" />
 
-        <AutoCompleteTextView id="@+id/from"
+        <AutoCompleteTextView android:id="@+id/from"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="&lt;&lt;HERE&gt;&gt;" />
+            android:layout_weight="1"/>
 
-	    <Button id="@+id/here"
+	    <Button android:id="@+id/here"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="HERE" />
@@ -34,27 +33,27 @@
         android:padding="10dip"
         android:fadingEdge="horizontal">
 
-		<view id="@+id/mapview"
+		<view android:id="@+id/mapview"
 			class="com.google.android.maps.MapView"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_weight="1" />
 			
-	    <LinearLayout
+	    <!--LinearLayout
 	        android:orientation="horizontal"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content">
-		    <Button id="@+id/zoomin"
+		    <Button android:id="@+id/zoomin"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="ZOOM IN"
 		        android:layout_weight="1" />
-		    <Button id="@+id/zoomout"
+		    <Button android:id="@+id/zoomout"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="ZOOM OUT"
 		        android:layout_weight="1" />
-	    </LinearLayout>
+	    </LinearLayout-->
     </LinearLayout>
 
     <LinearLayout
@@ -67,12 +66,12 @@
             android:layout_height="wrap_content"
             android:text="TO:" />
 
-        <AutoCompleteTextView id="@+id/to"
+        <AutoCompleteTextView android:id="@+id/to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
-	    <Button id="@+id/idioms"
+	    <Button android:id="@+id/idioms"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="IDIOMS" />
@@ -84,17 +83,17 @@
         android:layout_height="wrap_content"
         >
 
-	    <Button id="@+id/send"
+	    <Button android:id="@+id/send"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="SEND"
 	        android:layout_weight="1" />
-	    <Button id="@+id/save"
+	    <Button android:id="@+id/save"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="SAVE"
 	        android:layout_weight="1" />
-	    <Button id="@+id/cancel"
+	    <Button android:id="@+id/cancel"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="CANCEL"

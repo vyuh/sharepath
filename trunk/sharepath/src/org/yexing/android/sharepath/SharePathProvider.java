@@ -21,15 +21,16 @@ import java.util.HashMap;
 import org.yexing.android.sharepath.domain.SharePath;
 
 import android.content.ContentProvider;
-import android.content.ContentProviderDatabaseHelper;
-import android.content.ContentURIParser;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.content.ContentUris;
+import android.content.UriMatcher;
 import android.content.ContentValues;
-import android.content.QueryBuilder;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.content.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -39,25 +40,44 @@ public class SharePathProvider extends ContentProvider {
 
 	private static final String TAG = "SharePathProvider";
 	private static final String DATABASE_NAME = "sharepath.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 9;
 
-	private static HashMap<String, String> MESSAGE_LIST_PROJECTION_MAP;
 
 	private static final int MESSAGE = 1;
 	private static final int MESSAGE_ID = 2;
+	private static final int BUDDY = 3;
+	private static final int BUDDY_ID = 4;
 
-	private static final ContentURIParser URL_MATCHER;
+	private static final UriMatcher URL_MATCHER;
 
-	private static class DatabaseHelper extends ContentProviderDatabaseHelper {
+	static {
+		URL_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"message", MESSAGE);
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"message/#", MESSAGE_ID);
+
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"buddy", BUDDY);
+		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
+				"buddy/#", BUDDY_ID);
+
+	}
+	
+	private static class DatabaseHelper extends SQLiteOpenHelper {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db
-					.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
-							+ "_type INTEGER," + "_from TEXT," + "_to TEXT,"
-							+ "_date INTEGER," + "_sent INTEGER,"
-							+ "_read INTEGER," + "_level INTEGER,"
-							+ "_center TEXT," + "_path TEXT" + ");");
+			.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
+					+ "_type INTEGER," + "_from_person TEXT," + "_to_person TEXT,"
+					+ "_from TEXT," + "_to TEXT,"
+					+ "_date INTEGER," + "_sent INTEGER,"
+					+ "_read INTEGER," + "_level INTEGER,"
+					+ "_center TEXT," + "_path TEXT" + ");");
+			db
+			.execSQL("CREATE TABLE buddy (_id INTEGER PRIMARY KEY,"
+					+ "_email TEXT," + "_name TEXT," + "_point INTEGER" + ");");
 		}
 
 		@Override
@@ -65,6 +85,7 @@ public class SharePathProvider extends ContentProvider {
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
 			db.execSQL("DROP TABLE IF EXISTS message");
+			db.execSQL("DROP TABLE IF EXISTS buddy");
 			onCreate(db);
 		}
 	}
@@ -78,41 +99,65 @@ public class SharePathProvider extends ContentProvider {
 	}
 
 	@Override
-	public Cursor query(ContentURI url, String[] projection, String selection,
-			String[] selectionArgs, String groupBy, String having, String sort) {
-		QueryBuilder qb = new QueryBuilder();
+	public Cursor query(Uri url, String[] projection, String selection,
+			String[] selectionArgs, String sort) {
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+		String orderBy;
 
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			qb.setTables("message");
-			qb.setProjectionMap(MESSAGE_LIST_PROJECTION_MAP);
+			qb.setProjectionMap(SharePath.Message.MESSAGE_LIST_PROJECTION_MAP);
+			if (TextUtils.isEmpty(sort)) {
+				orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
+			} else {
+				orderBy = sort;
+			}
 			break;
 
 		case MESSAGE_ID:
 			qb.setTables("message");
-			qb.appendWhere("_id=" + url.getPathSegment(1));
+			qb.appendWhere("_id=" + url.getLastPathSegment());
+			if (TextUtils.isEmpty(sort)) {
+				orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
+			} else {
+				orderBy = sort;
+			}
+			break;
+
+		case BUDDY:
+			qb.setTables("buddy");
+			qb.setProjectionMap(SharePath.Buddy.BUDDY_LIST_PROJECTION_MAP);
+			if (TextUtils.isEmpty(sort)) {
+				orderBy = SharePath.Buddy.DEFAULT_SORT_ORDER;
+			} else {
+				orderBy = sort;
+			}
+			break;
+
+		case BUDDY_ID:
+			qb.setTables("buddy");
+			qb.appendWhere("_id=" + url.getLastPathSegment());
+			if (TextUtils.isEmpty(sort)) {
+				orderBy = SharePath.Buddy.DEFAULT_SORT_ORDER;
+			} else {
+				orderBy = sort;
+			}
 			break;
 
 		default:
 			throw new IllegalArgumentException("Unknown URL " + url);
 		}
 
-		// If no sort order is specified use the default
-		String orderBy;
-		if (TextUtils.isEmpty(sort)) {
-			orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
-		} else {
-			orderBy = sort;
-		}
 
-		Cursor c = qb.query(mDB, projection, selection, selectionArgs, groupBy,
-				having, orderBy);
+		Cursor c = qb.query(mDB, projection, selection, selectionArgs, null,
+				null, orderBy);
 		c.setNotificationUri(getContext().getContentResolver(), url);
 		return c;
 	}
 
 	@Override
-	public String getType(ContentURI url) {
+	public String getType(Uri url) {
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			return "vnd.android.cursor.dir/vnd.yexing.sharepath.message";
@@ -126,7 +171,7 @@ public class SharePathProvider extends ContentProvider {
 	}
 
 	@Override
-	public ContentURI insert(ContentURI url, ContentValues initialValues) {
+	public Uri insert(Uri url, ContentValues initialValues) {
 		long rowID;
 		ContentValues values;
 		if (initialValues != null) {
@@ -135,34 +180,46 @@ public class SharePathProvider extends ContentProvider {
 			values = new ContentValues();
 		}
 
-		if (URL_MATCHER.match(url) != MESSAGE) {
+		switch(URL_MATCHER.match(url)) {
+		case MESSAGE:
+			rowID = mDB.insert("message", "_from", values);
+			if (rowID > 0) {
+				Uri uri = ContentUris.appendId(SharePath.Message.CONTENT_URI.buildUpon(), rowID).build();
+				getContext().getContentResolver().notifyChange(uri, null);
+				return uri;
+			}
+			break;
+		case BUDDY:
+			rowID = mDB.insert("buddy", "_name", values);
+			if (rowID > 0) {
+				Uri uri = ContentUris.appendId(SharePath.Buddy.CONTENT_URI.buildUpon(), rowID).build();
+				getContext().getContentResolver().notifyChange(uri, null);
+				return uri;
+			}
+			break;
+		default:
 			throw new IllegalArgumentException("Unknown URL " + url);
+				
 		}
 
-		Long now = Long.valueOf(System.currentTimeMillis());
-		Resources r = Resources.getSystem();
+//		Long now = Long.valueOf(System.currentTimeMillis());
+//		Resources r = Resources.getSystem();
 
 		// Make sure that the fields are all set
 		// if (values.containsKey(SharePath.Message.DATE) == false) {
 		// values.put(SharePath.Message.DATE, now);
 		// }
 
-		if (values.containsKey(SharePath.Message.FROM) == false) {
-			values.put(SharePath.Message.FROM, "unknow");
-		}
+//		if (values.containsKey(SharePath.Message.FROM) == false) {
+//			values.put(SharePath.Message.FROM, "unknow");
+//		}
 
-		rowID = mDB.insert("message", "_from", values);
-		if (rowID > 0) {
-			ContentURI uri = SharePath.Message.CONTENT_URI.addId(rowID);
-			getContext().getContentResolver().notifyChange(uri, null);
-			return uri;
-		}
 
 		throw new SQLException("Failed to insert row into " + url);
 	}
 
 	@Override
-	public int delete(ContentURI url, String where, String[] whereArgs) {
+	public int delete(Uri url, String where, String[] whereArgs) {
 		int count;
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
@@ -170,7 +227,7 @@ public class SharePathProvider extends ContentProvider {
 			break;
 
 		case MESSAGE_ID:
-			String segment = url.getPathSegment(1);
+			String segment = url.getLastPathSegment();
 			count = mDB.delete("message",
 					"_id="
 							+ segment
@@ -187,7 +244,7 @@ public class SharePathProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(ContentURI url, ContentValues values, String where,
+	public int update(Uri url, ContentValues values, String where,
 			String[] whereArgs) {
 		int count;
 		switch (URL_MATCHER.match(url)) {
@@ -196,7 +253,7 @@ public class SharePathProvider extends ContentProvider {
 			break;
 
 		case MESSAGE_ID:
-			String segment = url.getPathSegment(1);
+			String segment = url.getLastPathSegment();
 			count = mDB.update("message", values,
 					"_id="
 							+ segment
@@ -212,24 +269,4 @@ public class SharePathProvider extends ContentProvider {
 		return count;
 	}
 
-	static {
-		URL_MATCHER = new ContentURIParser(ContentURIParser.NO_MATCH);
-		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
-				"message", MESSAGE);
-		URL_MATCHER.addURI("org.yexing.android.sharepath.domain.SharePath",
-				"message/#", MESSAGE_ID);
-
-		MESSAGE_LIST_PROJECTION_MAP = new HashMap<String, String>();
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message._ID, SharePath.Message._ID);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TYPE, SharePath.Message.TYPE);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM, SharePath.Message.FROM);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TO, SharePath.Message.TO);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.DATE, SharePath.Message.DATE);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.SENT, SharePath.Message.SENT);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.READ, SharePath.Message.READ);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.LEVEL, SharePath.Message.LEVEL);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.CENTER, SharePath.Message.CENTER);
-		MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.PATH, SharePath.Message.PATH);
-
-	}
 }

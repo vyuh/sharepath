@@ -39,7 +39,7 @@
     <style name="Theme.Translucent">
         <item name="android:windowBackground">@drawable/translucent_background</item>
 <!--        <item name="android:windowNoTitle">true</item>-->
-        <item name="android:foregroundColor">#fff</item>
+<!--        <item name="android:foregroundColor">#fff</item>-->
     </style>
 
     <!-- Variation on our application theme that has a transparent
@@ -48,6 +48,6 @@
     <style name="Theme.Transparent">
         <item name="android:windowBackground">@drawable/transparent_background</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:foregroundColor">#fff</item>
+<!--        <item name="android:foregroundColor">#fff</item>-->
     </style>
 </resources>
