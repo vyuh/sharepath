@@ -24,7 +24,7 @@
         text style. -->
     <style name="Theme.PlainText">
         <item name="android:textStyle">normal</item>
-        <item name="android:windowBadge">@drawable/badge_pic</item>
+        <item name="android:windowBadge">@drawable/badge</item>
         <item name="android:windowBadgeAlpha">96</item>
     </style>
 

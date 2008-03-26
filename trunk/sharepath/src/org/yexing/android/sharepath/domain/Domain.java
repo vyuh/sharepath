@@ -25,17 +25,20 @@ import android.provider.BaseColumns;
 /**
  * Convenience definitions for SharePathProvider
  */
-public final class SharePath {
+public final class Domain {
 	/**
 	 * Message table
 	 */
 	public static final class Message implements BaseColumns {
+
 		public static final int TYPE_INDEX = 1;
-		public static final int FROM_PERSON_INDEX = TYPE_INDEX + 1;
-		public static final int TO_PERSON_INDEX = FROM_PERSON_INDEX + 1;
-		public static final int FROM_INDEX = TO_PERSON_INDEX + 1;
+//		public static final int FROM_PERSON_INDEX = TYPE_INDEX + 1;
+//		public static final int TO_PERSON_INDEX = FROM_PERSON_INDEX + 1;
+		public static final int FROM_INDEX = TYPE_INDEX + 1;
 		public static final int TO_INDEX = FROM_INDEX + 1;
-		public static final int DATE_INDEX = TO_INDEX + 1;
+		public static final int START_INDEX = TO_INDEX + 1;
+		public static final int END_INDEX = START_INDEX + 1;
+		public static final int DATE_INDEX = END_INDEX + 1;
 		public static final int SENT_INDEX = DATE_INDEX + 1;
 		public static final int READ_INDEX = SENT_INDEX + 1;
 		public static final int LEVEL_INDEX = READ_INDEX + 1;
@@ -43,29 +46,32 @@ public final class SharePath {
 		public static final int PATH_INDEX = CENTER_INDEX + 1;
 
 		public static final String[] PROJECTION = new String[] {
-				SharePath.Message._ID, SharePath.Message.TYPE,
-				SharePath.Message.FROM_PERSON, SharePath.Message.TO_PERSON,
-				SharePath.Message.FROM, SharePath.Message.TO,
-				SharePath.Message.DATE, SharePath.Message.SENT,
-				SharePath.Message.READ, SharePath.Message.LEVEL,
-				SharePath.Message.CENTER, SharePath.Message.PATH };
+				Domain.Message._ID, Domain.Message.TYPE,
+//				SharePath.Message.FROM_PERSON, SharePath.Message.TO_PERSON,
+				Domain.Message.FROM, Domain.Message.TO,
+				Domain.Message.START, Domain.Message.END,
+				Domain.Message.DATE, Domain.Message.SENT,
+				Domain.Message.READ, Domain.Message.LEVEL,
+				Domain.Message.CENTER, Domain.Message.PATH };
 
 		public static HashMap<String, String> MESSAGE_LIST_PROJECTION_MAP;
 		
 		static {
 			MESSAGE_LIST_PROJECTION_MAP = new HashMap<String, String>();
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message._ID, SharePath.Message._ID);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TYPE, SharePath.Message.TYPE);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM_PERSON, SharePath.Message.FROM_PERSON);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TO_PERSON, SharePath.Message.TO_PERSON);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM, SharePath.Message.FROM);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TO, SharePath.Message.TO);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.DATE, SharePath.Message.DATE);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.SENT, SharePath.Message.SENT);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.READ, SharePath.Message.READ);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.LEVEL, SharePath.Message.LEVEL);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.CENTER, SharePath.Message.CENTER);
-			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.PATH, SharePath.Message.PATH);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message._ID, Domain.Message._ID);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.TYPE, Domain.Message.TYPE);
+//			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.FROM_PERSON, SharePath.Message.FROM_PERSON);
+//			MESSAGE_LIST_PROJECTION_MAP.put(SharePath.Message.TO_PERSON, SharePath.Message.TO_PERSON);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.FROM, Domain.Message.FROM);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.TO, Domain.Message.TO);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.START, Domain.Message.START);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.END, Domain.Message.END);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.DATE, Domain.Message.DATE);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.SENT, Domain.Message.SENT);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.READ, Domain.Message.READ);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.LEVEL, Domain.Message.LEVEL);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.CENTER, Domain.Message.CENTER);
+			MESSAGE_LIST_PROJECTION_MAP.put(Domain.Message.PATH, Domain.Message.PATH);
 		}
 		/**
 		 * The content:// style URL for this table
@@ -86,21 +92,21 @@ public final class SharePath {
 		 */
 		public static final String TYPE = "_type";
 
-		/**
-		 * send from
-		 * <P>
-		 * Type: TEXT
-		 * </P>
-		 */
-		public static final String FROM_PERSON = "_from_person";
-
-		/**
-		 * send to
-		 * <P>
-		 * Type: TEXT
-		 * </P>
-		 */
-		public static final String TO_PERSON = "_to_person";
+//		/**
+//		 * send from
+//		 * <P>
+//		 * Type: TEXT
+//		 * </P>
+//		 */
+//		public static final String FROM_PERSON = "_from_person";
+//
+//		/**
+//		 * send to
+//		 * <P>
+//		 * Type: TEXT
+//		 * </P>
+//		 */
+//		public static final String TO_PERSON = "_to_person";
 		/**
 		 * send from
 		 * <P>
@@ -116,6 +122,22 @@ public final class SharePath {
 		 * </P>
 		 */
 		public static final String TO = "_to";
+
+		/**
+		 * start place
+		 * <P>
+		 * Type: TEXT
+		 * </P>
+		 */
+		public static final String START = "_start";
+
+		/**
+		 * end place
+		 * <P>
+		 * Type: TEXT
+		 * </P>
+		 */
+		public static final String END = "_end";
 
 		/**
 		 * The timestamp for when the message was sent
@@ -172,22 +194,22 @@ public final class SharePath {
 	 */
 	public static final class Buddy implements BaseColumns {
 
-		public static final int EMIL_INDEX = 1;
-		public static final int NAME_INDEX = EMIL_INDEX + 1;
+		public static final int EMAIL_INDEX = 1;
+		public static final int NAME_INDEX = EMAIL_INDEX + 1;
 		public static final int POINT_INDEX = NAME_INDEX + 1;
 
 		public static final String[] PROJECTION = new String[] {
-				SharePath.Buddy._ID, SharePath.Buddy.EMAIL,
-				SharePath.Buddy.NAME, SharePath.Buddy.POINT };
+				Domain.Buddy._ID, Domain.Buddy.EMAIL,
+				Domain.Buddy.NAME, Domain.Buddy.POINT };
 
 		public static HashMap<String, String> BUDDY_LIST_PROJECTION_MAP;
 		
 		static {
 			BUDDY_LIST_PROJECTION_MAP = new HashMap<String, String>();
-			BUDDY_LIST_PROJECTION_MAP.put(SharePath.Buddy._ID, SharePath.Buddy._ID);
-			BUDDY_LIST_PROJECTION_MAP.put(SharePath.Buddy.EMAIL, SharePath.Buddy.EMAIL);
-			BUDDY_LIST_PROJECTION_MAP.put(SharePath.Buddy.NAME, SharePath.Buddy.NAME);
-			BUDDY_LIST_PROJECTION_MAP.put(SharePath.Buddy.POINT, SharePath.Buddy.POINT);
+			BUDDY_LIST_PROJECTION_MAP.put(Domain.Buddy._ID, Domain.Buddy._ID);
+			BUDDY_LIST_PROJECTION_MAP.put(Domain.Buddy.EMAIL, Domain.Buddy.EMAIL);
+			BUDDY_LIST_PROJECTION_MAP.put(Domain.Buddy.NAME, Domain.Buddy.NAME);
+			BUDDY_LIST_PROJECTION_MAP.put(Domain.Buddy.POINT, Domain.Buddy.POINT);
 		}
 		/**
 		 * The content:// style URL for this table

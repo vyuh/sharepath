@@ -16,43 +16,104 @@
 
 package org.yexing.android.sharepath;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
-import android.widget.Toast;
+import org.yexing.android.sharepath.domain.Domain;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.Service;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 
 public class SharePathService extends Service {
-	@Override
-	protected void onCreate() {
-//		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+	private static final String LOG_TAG = "SharePath";
 
-		// This is who should be launched if the user selects our persistent
-		// notification.
-//		Intent intent = new Intent();
-		// intent.setClass(this, LocalServiceController.class);
-
-		// Display a notification about us starting. We use both a transient
-		// notification and a persistent notification in the status bar.
-//		mNM.notifyWithText(R.string.sharepath_service_started,
-//				getText(R.string.sharepath_service_started),
-//				NotificationManager.LENGTH_SHORT, new Notification(
-//						R.drawable.stat_sample,
-//						getText(R.string.sharepath_service), null, null, null));
-        Toast.makeText(this, getText(R.string.sharepath_service_started), Toast.LENGTH_LONG)
-        	.show();
-
-	}
+	public static final int ACTION_SEARCH_NEW_REQUEST = 1;
+	public static final int ACTION_NEW_REQUEST = ACTION_SEARCH_NEW_REQUEST + 1;
+	public static final int ACTION_NEW_MYMAP = ACTION_NEW_REQUEST + 1;
+	public static final int ACTION_EDIT_MYMAP = ACTION_NEW_MYMAP + 1;
+	public static final int ACTION_DELETE_REQUEST = ACTION_EDIT_MYMAP + 1;
+	public static final int ACTION_DELETE_ALL_REQUEST = ACTION_DELETE_REQUEST + 1;
+	public static final int ACTION_DELETE_BUDDY = ACTION_DELETE_ALL_REQUEST + 1;
+	public static final int ACTION_DELETE_ALL_BUDDIES = ACTION_DELETE_BUDDY + 1;
+	public static final int ACTION_NEW_BUDDY = ACTION_DELETE_ALL_BUDDIES + 1;
+	public static final int ACTION_EDIT_BUDDY = ACTION_NEW_BUDDY + 1;	
+	public static final int ACTION_DELETE_MYMAP = ACTION_EDIT_BUDDY + 1;	
+	public static final int ACTION_DELETE_ALL_MYMAPS = ACTION_DELETE_MYMAP + 1;	
 
 	@Override
-	protected void onDestroy() {
-		// Cancel the persistent notification.
-//		mNM.cancel(R.string.sharepath_service_started);
-//
-//		// Tell the user we stopped.
-//		mNM.notifyWithText(R.string.sharepath_service_stopped,
-//				getText(R.string.sharepath_service_stopped),
-//				NotificationManager.LENGTH_SHORT, null);
+	protected void onStart(int startId, Bundle bundle) {
+		// TODO Auto-generated method stub
+		super.onStart(startId, bundle);
+		int action = bundle.getInt("action");
+		if (action == 0)
+			return;
+		switch (action) {
+		case SharePathService.ACTION_SEARCH_NEW_REQUEST:
+			Log.i(LOG_TAG, "ACTION_SEARCH_NEW_MESSAGE");
+			break;
+		case SharePathService.ACTION_NEW_REQUEST:
+		{
+			Log.i(LOG_TAG, "ACTION_NEW_REQUEST");
+			ContentValues cv = createMessageValue(bundle);
+			getContentResolver().insert(Domain.Message.CONTENT_URI, cv);
+			showNotification(bundle.getString(Domain.Message.FROM));
+		}
+			break;
+		case SharePathService.ACTION_DELETE_REQUEST:
+			getContentResolver().delete(Domain.Message.CONTENT_URI,
+					"_id=" + bundle.getLong(Domain.Message._ID), null);
+			break;
+		case SharePathService.ACTION_NEW_MYMAP:
+		{
+			Log.i(LOG_TAG, "ACTION_SAVE_MAP");
+			ContentValues cv = createMessageValue(bundle);
+			cv.put(Domain.Message.TYPE, 3);
+			getContentResolver().insert(Domain.Message.CONTENT_URI, cv);
+//			showNotification(bundle.getString(Domain.Message.FROM));
+		}
+			break;
+		case SharePathService.ACTION_EDIT_MYMAP:
+		{
+			Log.i(LOG_TAG, "ACTION_EDIT_MAP");
+			Long id = bundle.getLong(Domain.Message._ID);
+			ContentValues cv = createMessageValue(bundle);
+			cv.put(Domain.Message.TYPE, 3);
+			getContentResolver().update(Domain.Message.CONTENT_URI, cv, 
+					"_id=" + id, null);
+//			showNotification(bundle.getString(Domain.Message.FROM));
+		}
+			break;
+		case SharePathService.ACTION_DELETE_ALL_REQUEST:
+			getContentResolver().delete(Domain.Message.CONTENT_URI,
+					"_type=0", null);
+			break;
+		case SharePathService.ACTION_DELETE_BUDDY:
+			getContentResolver().delete(Domain.Buddy.CONTENT_URI,
+					"_id=" + bundle.getLong(Domain.Buddy._ID), null);
+			break;
+		case SharePathService.ACTION_DELETE_ALL_BUDDIES:
+			getContentResolver().delete(Domain.Buddy.CONTENT_URI,
+					null, null);
+			break;
+		case SharePathService.ACTION_NEW_BUDDY:
+			getContentResolver().insert(Domain.Buddy.CONTENT_URI, createBuddyValue(bundle));
+			break;
+		case SharePathService.ACTION_EDIT_BUDDY:
+			getContentResolver().update(Domain.Buddy.CONTENT_URI, createBuddyValue(bundle),
+					"_id=" + bundle.getLong(Domain.Buddy._ID), null);
+			break;
+		case SharePathService.ACTION_DELETE_MYMAP:
+			getContentResolver().delete(Domain.Message.CONTENT_URI,
+					"_id=" + bundle.getLong(Domain.Message._ID), null);
+			break;
+		case SharePathService.ACTION_DELETE_ALL_MYMAPS:
+			getContentResolver().delete(Domain.Message.CONTENT_URI,
+					"_type=3", null);
+			break;
+		}
 	}
 
 	@Override
@@ -61,22 +122,83 @@ public class SharePathService extends Service {
 		return null;
 	}
 
-	
+	private ContentValues createMessageValue(Bundle bundle) {
+		ContentValues cv = new ContentValues();
 
-//	@Override
-//	public IBinder getBinder() {
-//		return mBinder;
-//	}
-//
-//	// This is the object that receives interactions from clients. See
-//	// RemoteService for a more complete example.
-//	private final IBinder mBinder = new BinderNative() {
-//		@Override
-//		protected boolean onTransact(int code, Parcel data, Parcel reply,
-//				int flags) {
-//			return super.onTransact(code, data, reply, flags);
-//		}
-//	};
-//
-//	private NotificationManager mNM;
+		cv.put(Domain.Message.TYPE, bundle.getInt(Domain.Message.TYPE));
+		cv.put(Domain.Message.FROM, bundle.getString(Domain.Message.FROM));
+		cv.put(Domain.Message.TO, bundle.getString(Domain.Message.TO));
+		cv.put(Domain.Message.DATE, bundle.getLong(Domain.Message.DATE));
+		cv.put(Domain.Message.READ, bundle.getInt(Domain.Message.READ));
+		cv.put(Domain.Message.START, bundle.getString(Domain.Message.START));
+		cv.put(Domain.Message.END, bundle.getString(Domain.Message.END));
+		cv.put(Domain.Message.LEVEL, bundle.getInt(Domain.Message.LEVEL));
+		cv.put(Domain.Message.CENTER, bundle.getInt(Domain.Message.CENTER
+				+ "lat")
+				+ "\b" + bundle.getInt(Domain.Message.CENTER + "lon"));
+		cv.put(Domain.Message.PATH, bundle.getString(Domain.Message.PATH));
+		
+		Log.v(LOG_TAG, "service:" + bundle.getInt(Domain.Message.CENTER
+				+ "lat")
+				+ "\b" + bundle.getInt(Domain.Message.CENTER + "lon")
+				+ " L:" + bundle.getInt(Domain.Message.LEVEL));
+		return cv;
+	}
+
+	private ContentValues createBuddyValue(Bundle bundle) {
+		ContentValues cv = new ContentValues();
+
+		cv.put(Domain.Buddy.NAME, bundle.getString(Domain.Buddy.NAME));
+		cv.put(Domain.Buddy.EMAIL, bundle.getString(Domain.Buddy.EMAIL));
+		return cv;
+	}
+	/**
+	 * The notification is the icon and associated expanded entry in the status
+	 * bar.
+	 */
+	protected void showNotification(String from) {
+		// look up the notification manager service
+		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+		// What happens when we click the notification in the expanded status
+		// bar. In this
+		// case, we launch the IncomingMessageView activity.
+		Intent contentIntent = new Intent(this, SharePathService.class);
+
+		// The ticker text, this uses a formatted string so our message could be
+		// localized
+		String tickerText = getString(R.string.imcoming_message_ticker_text,
+				from);
+
+		// What happens when we click the app icon -- we'll just launch the SMS
+		// Inbox for
+		// the purposes of this demo
+		Intent appIntent = new Intent(this,
+				org.yexing.android.sharepath.Main.class);
+
+		// construct the Notification object.
+		Notification notif = new Notification(this, // our context
+				R.drawable.notify_icon, // the icon for the status bar
+				tickerText, // the text to display in the ticker
+				System.currentTimeMillis(), // the timestamp for the
+											// notification
+				from, // the title for the notification
+				tickerText, // the details to display in the notification
+				contentIntent, // the contentIntent (see above)
+				R.drawable.icon, // the app icon
+				getText(R.string.app_name), // the name of the app
+				appIntent);
+
+		// after a 100ms delay, vibrate for 250ms, pause for 100 ms and
+		// then vibrate for 500ms.
+		notif.vibrate = new long[] { 100, 250, 100, 500 };
+
+		// Note that we use R.layout.incoming_message_panel as the ID for
+		// the notification. It could be any integer you want, but we use
+		// the convention of using a resource id for a string related to
+		// the notification. It will always be a unique number within your
+		// application.
+		nm.notify(R.string.imcoming_message_ticker_text, notif);
+	}
+
 }
