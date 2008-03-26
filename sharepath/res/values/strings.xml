@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SharePath</string>
-    <string name="request">New Request</string>
+    <string name="app_name">SharePath v0.7</string>
+    <string name="request">Ask for Directions</string>
     <string name="record">Record My Path</string>
     <string name="inbox">Inbox</string>
     <string name="outbox">outbox</string>
     <string name="sent">Sent</string>
-    <string name="draft">Draft</string>
+    <string name="mymaps">My Maps</string>
     <string name="buddy">Buddy</string>
+    
+    <string name="nobody">Nobody</string>
+    <string name="nothing">Nothing</string>
+    
     <string name="sharepath_service">SharePath Service</string>
     <string name="sharepath_service_started">SharePath Service Started!</string>
     <string name="sharepath_service_stopped">SharePath Service Stopped!</string>
+    
     <string name="unknow">unknow</string>
+    
+    <string name="tooltip_dialog">Add a Badge</string>
+    <string name="tooltip_dialog_ok">OK</string>
+    <string name="tooltip_dialog_cancel">CANCEL</string>
+    <string name="send_request_successful">Send Request Successful!</string>
+    <string name="imcoming_message_ticker_text">New sharepath message from %0$s</string>
+	<!-- map actions -->
+    <string name="browse">Browse</string>
+    <string name="mark">Mark</string>
+    
+    <!-- menu action -->
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="reply">Reply</string>
+    <string name="delete">Delete</string>
+    <string name="delete_all">Delete All</string>
+    
 </resources>

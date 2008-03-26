@@ -12,48 +12,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FROM:" />
+            android:text="FROM:"
+            android:width="50px"
+            />
 
-        <AutoCompleteTextView android:id="@+id/from"
+        <EditText android:id="@+id/request_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:width="200px"
+            android:text="here"/>
 
-	    <Button android:id="@+id/here"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="HERE" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="10dip"
-        android:fadingEdge="horizontal">
-
-		<view android:id="@+id/mapview"
-			class="com.google.android.maps.MapView"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_weight="1" />
-			
-	    <!--LinearLayout
-	        android:orientation="horizontal"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content">
-		    <Button android:id="@+id/zoomin"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="ZOOM IN"
-		        android:layout_weight="1" />
-		    <Button android:id="@+id/zoomout"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="ZOOM OUT"
-		        android:layout_weight="1" />
-	    </LinearLayout-->
     </LinearLayout>
 
     <LinearLayout
@@ -64,34 +32,29 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TO:" />
+            android:text="TO:"
+            android:width="50px"
+            />
 
-        <AutoCompleteTextView android:id="@+id/to"
+        <EditText android:id="@+id/request_end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:width="200px"
+            android:text="our goal"/>
 
-	    <Button android:id="@+id/idioms"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="IDIOMS" />
     </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:padding="5px"
         >
 
 	    <Button android:id="@+id/send"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="SEND"
-	        android:layout_weight="1" />
-	    <Button android:id="@+id/save"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="SAVE"
 	        android:layout_weight="1" />
 	    <Button android:id="@+id/cancel"
 	        android:layout_width="wrap_content"

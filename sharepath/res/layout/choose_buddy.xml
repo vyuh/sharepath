@@ -4,12 +4,27 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<!-- org.yexing.android.sharepath.ChooseBuddyView
-		android:id="@+id/choosebuddy"
-		android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                /-->
-    
+
+    <FrameLayout
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent"
+        android:layout_weight="1" >
+        <!-- Here is the list. Since we are using a ListActivity, we
+             have to call it "@android:id/list" so ListActivity will
+             find it -->
+        <ListView android:id="@android:id/list"
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent"
+            android:drawSelectorOnTop="false"/>
+        
+        <!-- Here is the view to show if the list is emtpy -->
+        <TextView android:id="@+id/empty"
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent"
+            android:text="@string/nobody"/>
+            
+    </FrameLayout>
+        
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
@@ -61,26 +76,6 @@
 	        
     </LinearLayout>
     
-    <FrameLayout
-        android:layout_width="fill_parent" 
-        android:layout_height="fill_parent"
-        android:layout_weight="1" >
-        <!-- Here is the list. Since we are using a ListActivity, we
-             have to call it "@android:id/list" so ListActivity will
-             find it -->
-        <ListView android:id="@android:id/list"
-            android:layout_width="fill_parent" 
-            android:layout_height="fill_parent"
-            android:drawSelectorOnTop="false"/>
-        
-        <!-- Here is the view to show if the list is emtpy -->
-        <TextView android:id="@+id/empty"
-            android:layout_width="fill_parent" 
-            android:layout_height="fill_parent"
-            android:text="Nobody"/>
-            
-    </FrameLayout>
-        
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"

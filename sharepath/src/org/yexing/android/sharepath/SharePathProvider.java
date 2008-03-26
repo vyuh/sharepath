@@ -16,9 +16,7 @@
 
 package org.yexing.android.sharepath;
 
-import java.util.HashMap;
-
-import org.yexing.android.sharepath.domain.SharePath;
+import org.yexing.android.sharepath.domain.Domain;
 
 import android.content.ContentProvider;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -26,7 +24,6 @@ import android.content.ContentUris;
 import android.content.UriMatcher;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.content.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,7 +37,7 @@ public class SharePathProvider extends ContentProvider {
 
 	private static final String TAG = "SharePathProvider";
 	private static final String DATABASE_NAME = "sharepath.db";
-	private static final int DATABASE_VERSION = 9;
+	private static final int DATABASE_VERSION = 11;
 
 
 	private static final int MESSAGE = 1;
@@ -70,8 +67,10 @@ public class SharePathProvider extends ContentProvider {
 		public void onCreate(SQLiteDatabase db) {
 			db
 			.execSQL("CREATE TABLE message (_id INTEGER PRIMARY KEY,"
-					+ "_type INTEGER," + "_from_person TEXT," + "_to_person TEXT,"
+					+ "_type INTEGER,"
+//					+ "_from_person TEXT," + "_to_person TEXT,"
 					+ "_from TEXT," + "_to TEXT,"
+					+ "_start TEXT," + "_end TEXT,"
 					+ "_date INTEGER," + "_sent INTEGER,"
 					+ "_read INTEGER," + "_level INTEGER,"
 					+ "_center TEXT," + "_path TEXT" + ");");
@@ -107,9 +106,9 @@ public class SharePathProvider extends ContentProvider {
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			qb.setTables("message");
-			qb.setProjectionMap(SharePath.Message.MESSAGE_LIST_PROJECTION_MAP);
+			qb.setProjectionMap(Domain.Message.MESSAGE_LIST_PROJECTION_MAP);
 			if (TextUtils.isEmpty(sort)) {
-				orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
+				orderBy = Domain.Message.DEFAULT_SORT_ORDER;
 			} else {
 				orderBy = sort;
 			}
@@ -119,7 +118,7 @@ public class SharePathProvider extends ContentProvider {
 			qb.setTables("message");
 			qb.appendWhere("_id=" + url.getLastPathSegment());
 			if (TextUtils.isEmpty(sort)) {
-				orderBy = SharePath.Message.DEFAULT_SORT_ORDER;
+				orderBy = Domain.Message.DEFAULT_SORT_ORDER;
 			} else {
 				orderBy = sort;
 			}
@@ -127,9 +126,9 @@ public class SharePathProvider extends ContentProvider {
 
 		case BUDDY:
 			qb.setTables("buddy");
-			qb.setProjectionMap(SharePath.Buddy.BUDDY_LIST_PROJECTION_MAP);
+			qb.setProjectionMap(Domain.Buddy.BUDDY_LIST_PROJECTION_MAP);
 			if (TextUtils.isEmpty(sort)) {
-				orderBy = SharePath.Buddy.DEFAULT_SORT_ORDER;
+				orderBy = Domain.Buddy.DEFAULT_SORT_ORDER;
 			} else {
 				orderBy = sort;
 			}
@@ -139,7 +138,7 @@ public class SharePathProvider extends ContentProvider {
 			qb.setTables("buddy");
 			qb.appendWhere("_id=" + url.getLastPathSegment());
 			if (TextUtils.isEmpty(sort)) {
-				orderBy = SharePath.Buddy.DEFAULT_SORT_ORDER;
+				orderBy = Domain.Buddy.DEFAULT_SORT_ORDER;
 			} else {
 				orderBy = sort;
 			}
@@ -182,17 +181,17 @@ public class SharePathProvider extends ContentProvider {
 
 		switch(URL_MATCHER.match(url)) {
 		case MESSAGE:
-			rowID = mDB.insert("message", "_from", values);
+			rowID = mDB.insert("message", "_start", values);
 			if (rowID > 0) {
-				Uri uri = ContentUris.appendId(SharePath.Message.CONTENT_URI.buildUpon(), rowID).build();
+				Uri uri = ContentUris.appendId(Domain.Message.CONTENT_URI.buildUpon(), rowID).build();
 				getContext().getContentResolver().notifyChange(uri, null);
 				return uri;
 			}
 			break;
 		case BUDDY:
-			rowID = mDB.insert("buddy", "_name", values);
+			rowID = mDB.insert("buddy", "_email", values);
 			if (rowID > 0) {
-				Uri uri = ContentUris.appendId(SharePath.Buddy.CONTENT_URI.buildUpon(), rowID).build();
+				Uri uri = ContentUris.appendId(Domain.Buddy.CONTENT_URI.buildUpon(), rowID).build();
 				getContext().getContentResolver().notifyChange(uri, null);
 				return uri;
 			}
@@ -221,13 +220,26 @@ public class SharePathProvider extends ContentProvider {
 	@Override
 	public int delete(Uri url, String where, String[] whereArgs) {
 		int count;
+		String segment;
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			count = mDB.delete("message", where, whereArgs);
 			break;
 
 		case MESSAGE_ID:
-			String segment = url.getLastPathSegment();
+			segment = url.getLastPathSegment();
+			count = mDB.delete("message",
+					"_id="
+							+ segment
+							+ (!TextUtils.isEmpty(where) ? " AND (" + where
+									+ ')' : ""), whereArgs);
+			break;
+		case BUDDY:
+			count = mDB.delete("buddy", where, whereArgs);
+			break;
+
+		case BUDDY_ID:
+			segment = url.getLastPathSegment();
 			count = mDB.delete("message",
 					"_id="
 							+ segment
@@ -247,14 +259,27 @@ public class SharePathProvider extends ContentProvider {
 	public int update(Uri url, ContentValues values, String where,
 			String[] whereArgs) {
 		int count;
+		String segment;
 		switch (URL_MATCHER.match(url)) {
 		case MESSAGE:
 			count = mDB.update("message", values, where, whereArgs);
 			break;
 
 		case MESSAGE_ID:
-			String segment = url.getLastPathSegment();
+			segment = url.getLastPathSegment();
 			count = mDB.update("message", values,
+					"_id="
+							+ segment
+							+ (!TextUtils.isEmpty(where) ? " AND (" + where
+									+ ')' : ""), whereArgs);
+			break;
+		case BUDDY:
+			count = mDB.update("buddy", values, where, whereArgs);
+			break;
+
+		case BUDDY_ID:
+			segment = url.getLastPathSegment();
+			count = mDB.update("buddy", values,
 					"_id="
 							+ segment
 							+ (!TextUtils.isEmpty(where) ? " AND (" + where
