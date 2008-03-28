@@ -41,7 +41,7 @@ public class Request extends Activity {
 
 	Button mSendButton, mCancelButton;
 
-	static final int CHOOSE_BUDDY = 1;
+	static final int RETURN_CHOOSE_BUDDY = 1;
 	
 	int lat, lon, level;
 
@@ -50,15 +50,15 @@ public class Request extends Activity {
 		super.onCreate(icicle);
 		setContentView(R.layout.request);
 
-		// 检查启动参数
-		Intent intent = getIntent();
-		Bundle extras = intent.getExtras();
-		
-		lat = extras.getInt(Domain.Message.CENTER + "lat");
-		lon = extras.getInt(Domain.Message.CENTER + "lon");
-		level = extras.getInt(Domain.Message.LEVEL);
-		
-		Log.v(LOG_TAG, lat + ":" + lon + ":" + level);
+//		// 检查启动参数
+//		Intent intent = getIntent();
+//		Bundle extras = intent.getExtras();
+//		
+//		lat = extras.getInt(Domain.Message.CENTER + "lat");
+//		lon = extras.getInt(Domain.Message.CENTER + "lon");
+//		level = extras.getInt(Domain.Message.LEVEL);
+//		
+//		Log.v(LOG_TAG, lat + ":" + lon + ":" + level);
 		
 		etStart = (EditText) findViewById(R.id.request_start);
 		etStart.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -84,14 +84,15 @@ public class Request extends Activity {
 		mCancelButton = (Button) findViewById(R.id.cancel);
 		mCancelButton.setOnClickListener(mCancelListener);
 
-		mSendButton.setEnabled(false);
+//		mSendButton.setEnabled(false);
 
-		bindGTalkService();
+//		bindGTalkService();
 	}
 
 	private OnClickListener mSendListener = new OnClickListener() {
 		public void onClick(View v) {
-			startSubActivity(new Intent(Request.this,ChooseBuddy.class), CHOOSE_BUDDY);
+			startSubActivity(new Intent(Request.this,ChooseBuddy.class),
+					SharePathMap.CODE_CHOOSE_BUDDY);
 		}
 	};
 	private OnClickListener mCancelListener = new OnClickListener() {
@@ -103,38 +104,50 @@ public class Request extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode,
 			String data, Bundle extras) {
-		if (requestCode == CHOOSE_BUDDY) {
-			if (resultCode == RESULT_CANCELED) {
-				// Log.v("SharePath", "cancel");
-				finish();
-			} else {
-				// Log.v("SharePath", "OK");
-				if (loadPrefs()) {
-					// Log.v("SharePath", mTextPref);
-					if (mGTalkSession == null) {
-						showMessage("gtalk_service_not_connected");
-						return;
-					}
-
-					try {
-						mGTalkSession.sendDataMessage(mTextPref,
-								getIntentToSend());
-						Toast.makeText(this, getText(R.string.send_request_successful),
-								Toast.LENGTH_LONG).show();
-
-					} catch (DeadObjectException ex) {
-						Log.e(LOG_TAG, "caught " + ex);
-						showMessage("found_stale_gtalk_service");
-						mGTalkSession = null;
-						bindGTalkService();
-					}
-				} else {
-					showAlert("Error", 0, "Send Message Failed!", "OK", true);
-				}
+		if (requestCode == SharePathMap.CODE_CHOOSE_BUDDY) {
+			if(resultCode == RESULT_OK) {
+	            SharedPreferences preferences = getSharedPreferences("SharePath", 0);
+	            SharedPreferences.Editor editor = preferences.edit();
+	            editor.putString("start", etStart.getText().toString());
+	            editor.putString("end", etEnd.getText().toString());
+	            if (editor.commit()) {
+	                setResult(RESULT_OK);
+	            //    finish();
+	            }
 			}
+			finish();
+//			if (resultCode == RESULT_CANCELED) {
+//				// Log.v("SharePath", "cancel");
+//				finish();
+//			} else {
+//				// Log.v("SharePath", "OK");
+//				if (loadPrefs()) {
+//					// Log.v("SharePath", mTextPref);
+//					if (mGTalkSession == null) {
+//						showMessage("gtalk_service_not_connected");
+//						return;
+//					}
+//
+//					try {
+//						mGTalkSession.sendDataMessage(mTextPref,
+//								getIntentToSend());
+//						Toast.makeText(this, getText(R.string.send_request_successful),
+//								Toast.LENGTH_LONG).show();
+//
+//					} catch (DeadObjectException ex) {
+//						Log.e(LOG_TAG, "caught " + ex);
+//						showMessage("found_stale_gtalk_service");
+//						mGTalkSession = null;
+//						bindGTalkService();
+//					}
+//				} else {
+//					showAlert("Error", 0, "Send Message Failed!", "OK", true);
+//				}
+//			}
 		}
 	}
 
+/*
 	private final boolean loadPrefs() {
 		// Retrieve the current redirect values.
 		// NOTE: because this preference is shared between multiple
@@ -149,6 +162,7 @@ public class Request extends Activity {
 
 		return false;
 	}
+
 
 	@Override
 	protected void onDestroy() {
@@ -220,5 +234,5 @@ public class Request extends Activity {
 
 		return intent;
 	}
-
+*/
 }

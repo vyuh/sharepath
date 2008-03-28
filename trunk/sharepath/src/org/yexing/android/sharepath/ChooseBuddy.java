@@ -21,8 +21,8 @@ public class ChooseBuddy extends ListActivity {
 	private Cursor mCursor;
 	private Uri mURI;
 
-	EditText name;
-	EditText email;
+	EditText etName;
+	EditText etEmail;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -35,8 +35,8 @@ public class ChooseBuddy extends ListActivity {
 		// Tell the list view which view to display when the list is empty
 		getListView().setEmptyView(findViewById(R.id.empty));
 
-		name = (EditText) findViewById(R.id.name);
-		email = (EditText) findViewById(R.id.email);
+		etName = (EditText) findViewById(R.id.name);
+		etEmail = (EditText) findViewById(R.id.email);
 
 		Cursor c = getContentResolver().query(Domain.Buddy.CONTENT_URI,
 				null, null, null, null);
@@ -61,9 +61,9 @@ public class ChooseBuddy extends ListActivity {
 				Log.d("SharePath", mURI.toString());
 				mCursor = managedQuery(mURI, null, null, null, null);
 				mCursor.first();
-				mCursor.updateString(Domain.Buddy.EMAIL_INDEX, email
+				mCursor.updateString(Domain.Buddy.EMAIL_INDEX, etEmail
 						.getText().toString());
-				mCursor.updateString(Domain.Buddy.NAME_INDEX, name.getText()
+				mCursor.updateString(Domain.Buddy.NAME_INDEX, etName.getText()
 						.toString());
 				managedCommitUpdates(mCursor);
 			}
@@ -85,7 +85,7 @@ public class ChooseBuddy extends ListActivity {
 			public void onClick(View v) {
 	            SharedPreferences preferences = getSharedPreferences("SharePath", 0);
 	            SharedPreferences.Editor editor = preferences.edit();
-	            editor.putString("text", email.getText().toString());
+	            editor.putString("email", etEmail.getText().toString());
 	            if (editor.commit()) {
 	                setResult(RESULT_OK);
 	            }
@@ -104,8 +104,8 @@ public class ChooseBuddy extends ListActivity {
 						+ id);
 		mCursor = managedQuery(mURI, null, null, null);
 		mCursor.first();
-		name.setText(mCursor.getString(Domain.Buddy.NAME_INDEX));
-		email.setText(mCursor.getString(Domain.Buddy.EMAIL_INDEX));
+		etName.setText(mCursor.getString(Domain.Buddy.NAME_INDEX));
+		etEmail.setText(mCursor.getString(Domain.Buddy.EMAIL_INDEX));
 		
 		super.onListItemClick(l, v, position, id);
 	}

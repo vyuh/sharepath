@@ -36,7 +36,6 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="SharePathMap" android:label="@string/app_name" />
-		<activity android:name="Record" android:label="@string/record" />
 		<activity android:name="Request" android:label="@string/request"
 			android:theme="@android:style/Theme.Dialog" />
 		<activity android:name="Inbox" android:label="@string/inbox"/>

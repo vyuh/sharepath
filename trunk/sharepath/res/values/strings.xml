@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SharePath v0.7</string>
-    <string name="request">Ask for Directions</string>
+    <string name="request">Location</string>
     <string name="record">Record My Path</string>
     <string name="inbox">Inbox</string>
     <string name="outbox">outbox</string>

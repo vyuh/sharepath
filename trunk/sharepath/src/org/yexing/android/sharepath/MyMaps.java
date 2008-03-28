@@ -40,7 +40,7 @@ public class MyMaps extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		Intent intent = new Intent(this, org.yexing.android.sharepath.Record.class);
+		Intent intent = new Intent(this, org.yexing.android.sharepath.SharePathMap.class);
 		intent.putExtra(Domain.Message._ID, id);
 		intent.putExtra("navfrom", SharePathMap.FROM_MYMAPS);
 		mCursor.moveTo(position);

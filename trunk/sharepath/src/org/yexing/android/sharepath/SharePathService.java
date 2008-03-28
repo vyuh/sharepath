@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.xml.dom.InnerNodeImpl;
 
 public class SharePathService extends Service {
 	private static final String LOG_TAG = "SharePath";
@@ -126,8 +127,12 @@ public class SharePathService extends Service {
 		ContentValues cv = new ContentValues();
 
 		cv.put(Domain.Message.TYPE, bundle.getInt(Domain.Message.TYPE));
-		cv.put(Domain.Message.FROM, bundle.getString(Domain.Message.FROM));
-		cv.put(Domain.Message.TO, bundle.getString(Domain.Message.TO));
+		cv.put(Domain.Message.FROM, 
+				bundle.getString(Domain.Message.FROM) == ""?
+						"unknow":bundle.getString(Domain.Message.FROM));
+		cv.put(Domain.Message.TO, 
+				bundle.getString(Domain.Message.TO) == ""?
+						"unknow":bundle.getString(Domain.Message.TO));
 		cv.put(Domain.Message.DATE, bundle.getLong(Domain.Message.DATE));
 		cv.put(Domain.Message.READ, bundle.getInt(Domain.Message.READ));
 		cv.put(Domain.Message.START, bundle.getString(Domain.Message.START));
@@ -135,13 +140,15 @@ public class SharePathService extends Service {
 		cv.put(Domain.Message.LEVEL, bundle.getInt(Domain.Message.LEVEL));
 		cv.put(Domain.Message.CENTER, bundle.getInt(Domain.Message.CENTER
 				+ "lat")
-				+ "\b" + bundle.getInt(Domain.Message.CENTER + "lon"));
+				+ SharePathMap.INNER_SEPARATER + bundle.getInt(Domain.Message.CENTER + "lon"));
 		cv.put(Domain.Message.PATH, bundle.getString(Domain.Message.PATH));
 		
-		Log.v(LOG_TAG, "service:" + bundle.getInt(Domain.Message.CENTER
-				+ "lat")
-				+ "\b" + bundle.getInt(Domain.Message.CENTER + "lon")
-				+ " L:" + bundle.getInt(Domain.Message.LEVEL));
+		Log.v(LOG_TAG, "Service - path:" + bundle.getString(Domain.Message.PATH));
+		
+//		Log.v(LOG_TAG, "service:" + bundle.getInt(Domain.Message.CENTER
+//				+ "lat")
+//				+ SharePathMap.INNER_SEPARATER + bundle.getInt(Domain.Message.CENTER + "lon")
+//				+ " L:" + bundle.getInt(Domain.Message.LEVEL));
 		return cv;
 	}
 
