@@ -5,14 +5,19 @@ import java.util.ArrayList;
 import org.yexing.android.sharepath.domain.Domain;
 
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Resources;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.DeadObjectException;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -25,6 +30,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.gtalkservice.IGTalkService;
+import com.google.android.gtalkservice.IGTalkSession;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.OverlayController;
@@ -38,6 +46,7 @@ public class SharePathMap extends MapActivity {
 	static final int CODE_INBOX = CODE_CHOOSE_BUDDY + 1;
 	static final int CODE_MYMAPS = CODE_INBOX + 1;
 	static final int CODE_BUDDIES = CODE_MYMAPS + 1;
+	static final int CODE_ASK = CODE_BUDDIES + 1;
 
 	// 通用菜单项
 	public static final int MENU_ADD = 0;
@@ -56,6 +65,7 @@ public class SharePathMap extends MapActivity {
 	int navfrom = 0;
 	String start;
 	String end;
+	String from;
 
 	public static MarkableMapView mv;
 	public PathOverlay po;
@@ -86,6 +96,11 @@ public class SharePathMap extends MapActivity {
 	private static final int MENU_MYMAPS = MENU_INBOX + 1;
 	private static final int MENU_BUDDIES = MENU_MYMAPS + 1;
 
+	public static final String POINT_SEPARATER = "_point_";
+	public static final String INNER_SEPARATER = "_inner_";
+
+	SharedPreferences preferences;
+
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -100,8 +115,9 @@ public class SharePathMap extends MapActivity {
 			id = extras.getLong(Domain.Message._ID);
 			navfrom = extras.getInt("navfrom");
 			start = extras.getString(Domain.Message.START);
-			Log.v(LOG_TAG, "map navfrom:" + navfrom);
+			// Log.v(LOG_TAG, "map navfrom:" + navfrom);
 			end = extras.getString(Domain.Message.END);
+			from = extras.getString(Domain.Message.FROM);
 		}
 
 		// 去掉title bar
@@ -135,7 +151,7 @@ public class SharePathMap extends MapActivity {
 
 			// 设置中点坐标
 			String[] temp = mCursor.getString(Domain.Message.CENTER_INDEX)
-					.split("\b");
+					.split(INNER_SEPARATER);
 			mc.centerMapTo(new Point(Integer.parseInt(temp[0]), Integer
 					.parseInt(temp[1])), true);
 			// 缩放
@@ -144,15 +160,16 @@ public class SharePathMap extends MapActivity {
 			// 路径信息
 			String[] temp2;
 			if (mCursor.getString(Domain.Message.PATH_INDEX) != null) {
-				temp = mCursor.getString(Domain.Message.PATH_INDEX).split("\f");
+				temp = mCursor.getString(Domain.Message.PATH_INDEX).split(
+						POINT_SEPARATER);
 				mv.points.clear();
 
 				// Log.v(LOG_TAG, "temp " + temp.length);
-				// Log.v(LOG_TAG, "path " +
-				// mCursor.getString(SharePath.Message.PATH_INDEX));
+				Log.v(LOG_TAG, "path "
+						+ mCursor.getString(Domain.Message.PATH_INDEX));
 
 				for (int i = 0; i < temp.length; i++) {
-					temp2 = temp[i].split("\b");
+					temp2 = temp[i].split(INNER_SEPARATER);
 					// Log.v(LOG_TAG, "temp2 " + temp2.length);
 					KeyPoint tt = new KeyPoint(new android.graphics.Point(
 							Integer.parseInt(temp2[0]), Integer
@@ -176,7 +193,7 @@ public class SharePathMap extends MapActivity {
 		}
 
 		po = new PathOverlay(r, mv, screenWidth, screenHeight);
-		if(navfrom != 0) {
+		if (navfrom != 0) {
 			po.start = start;
 			po.end = end;
 		}
@@ -185,6 +202,8 @@ public class SharePathMap extends MapActivity {
 		// GraphicOverlay go = new GraphicOverlay(getResources().getDrawable(
 		// R.drawable.zoom_in), new android.graphics.Point(100, 100));
 		// oc.add(go, true);
+
+		bindGTalkService();
 	}
 
 	@Override
@@ -220,22 +239,62 @@ public class SharePathMap extends MapActivity {
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode,
+			String data, Bundle extras) {
+		if (requestCode == CODE_ASK) {
+			if (resultCode == RESULT_CANCELED) {
+				// Log.v("SharePath", "cancel");
+				// finish();
+			} else {
+				// Log.v("SharePath", "OK");
+				// Log.v("SharePath", mTextPref);
+				if (mGTalkSession == null) {
+					showMessage("gtalk_service_not_connected");
+					return;
+				}
+				preferences = getSharedPreferences("SharePath", 0);
+				start = preferences.getString("start", "unknow");
+				end = preferences.getString("end", "unknow");
+				String to = preferences.getString("email", null);
+				
+				if (to != null) {
+					try {
+						mGTalkSession.sendDataMessage(to,
+								getIntentToSend(0));
+						Toast.makeText(this,
+								getText(R.string.send_request_successful),
+								Toast.LENGTH_LONG).show();
+						Log.v(LOG_TAG, "send" + requestCode);
+
+					} catch (DeadObjectException ex) {
+						Log.e(LOG_TAG, "caught " + ex);
+						showMessage("found_stale_gtalk_service");
+						mGTalkSession = null;
+						bindGTalkService();
+					}
+				}
+			}
+		}
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Log.i(LOG_TAG, "onCreateOptionsMenu");
 
 		super.onCreateOptionsMenu(menu);
 
-//		menu.add(1, MENU_INBOX, "inbox").setIcon(
-//				r.getDrawable(R.drawable.about));
-//		menu.add(1, MENU_MYMAPS, "mymaps").setIcon(
-//				r.getDrawable(R.drawable.about));
-//		menu.add(1, MENU_BUDDIES, "Buddies").setIcon(
-//				r.getDrawable(R.drawable.about));
+		// menu.add(1, MENU_INBOX, "inbox").setIcon(
+		// r.getDrawable(R.drawable.about));
+		// menu.add(1, MENU_MYMAPS, "mymaps").setIcon(
+		// r.getDrawable(R.drawable.about));
+		// menu.add(1, MENU_BUDDIES, "Buddies").setIcon(
+		// r.getDrawable(R.drawable.about));
 
 		menu.add(0, MENU_BROWSE, R.string.browse).setIcon(
 				r.getDrawable(R.drawable.browse));
 		// menu.add(0, MENU_MARK,
 		// "Mark").setIcon(r.getDrawable(R.drawable.mark));
+		menu.add(0, MENU_SEND, "Send").setIcon(r.getDrawable(R.drawable.send));
 		menu.add(0, MENU_CLEAN, "Clean").setIcon(
 				r.getDrawable(R.drawable.clean));
 		menu.add(0, MENU_ASK, "Ask").setIcon(r.getDrawable(R.drawable.ask));
@@ -244,7 +303,6 @@ public class SharePathMap extends MapActivity {
 		menu.add(0, MENU_ADDBADGE, "Add Badge").setIcon(
 				r.getDrawable(R.drawable.badge));
 		menu.add(0, MENU_SAVE, "Save").setIcon(r.getDrawable(R.drawable.save));
-		menu.add(0, MENU_SEND, "Send").setIcon(r.getDrawable(R.drawable.send));
 		menu.add(0, MENU_LAYERS, "Layers").setIcon(
 				r.getDrawable(R.drawable.layers));
 
@@ -267,9 +325,10 @@ public class SharePathMap extends MapActivity {
 			itemBrowse.setTitle(getText(R.string.mark));
 		}
 
-		// switch(navfrom) {
-		// case FROM_INBOX:
-		// menu.get(menu.findItemIndex(MENU_SEND)).
+		// if(navfrom == FROM_INBOX) {
+		// menu.get(menu.findItemIndex(MENU_SEND)).setShown(true);
+		// } else {
+		// menu.get(menu.findItemIndex(MENU_SEND)).setShown(false);
 		// }
 		return true;
 	}
@@ -328,8 +387,8 @@ public class SharePathMap extends MapActivity {
 	public void browse() {
 		if (mv.marking == true) {
 			mv.marking = false;
-			Toast.makeText(this, "Turn to BROWSE mode...", Toast.LENGTH_LONG)
-					.show();
+			// Toast.makeText(this, "Turn to BROWSE mode...", Toast.LENGTH_LONG)
+			// .show();
 			mv.invalidate();
 		}
 	}
@@ -340,8 +399,8 @@ public class SharePathMap extends MapActivity {
 			po.lastlevel = mv.getZoomLevel();
 			po.center = mv.getMapCenter();
 			mv.marking = true;
-			Toast.makeText(this, "Turn to MARK mode...", Toast.LENGTH_LONG)
-					.show();
+			// Toast.makeText(this, "Turn to MARK mode...", Toast.LENGTH_LONG)
+			// .show();
 			mv.invalidate();
 		}
 	}
@@ -411,14 +470,16 @@ public class SharePathMap extends MapActivity {
 					String path = "";
 					for (int i = 0; i < po.showedPoints.size(); i++) {
 						tt = po.showedPoints.get(i);
-						path += "" + tt.p.x + "\b" + tt.p.y + "\b"
-								+ (tt.info == null ? "" : tt.info) + "\f";
+						path += "" + tt.p.x + INNER_SEPARATER + tt.p.y
+								+ INNER_SEPARATER
+								+ (tt.info == null ? "" : tt.info)
+								+ POINT_SEPARATER;
 					}
 					bundle.putString(Domain.Message.PATH, path);
 
 					bundle.putInt(Domain.Message.LEVEL, mv.getZoomLevel());
 					Log.v(LOG_TAG, "zoom level:" + po.zoomlevel);
-					
+
 					bundle.putInt(Domain.Message.CENTER + "lat", mv
 							.getMapCenter().getLatitudeE6());
 					bundle.putInt(Domain.Message.CENTER + "lon", mv
@@ -454,19 +515,34 @@ public class SharePathMap extends MapActivity {
 	}
 
 	public void send() {
-		startSubActivity(new Intent(this,
-				org.yexing.android.sharepath.ChooseBuddy.class),
-				CODE_CHOOSE_BUDDY);
+		if (navfrom == FROM_INBOX) {
+			try {
+				mGTalkSession.sendDataMessage(from, getIntentToSend(1));
+				Toast.makeText(this, getText(R.string.send_request_successful),
+						Toast.LENGTH_LONG).show();
+
+			} catch (DeadObjectException ex) {
+				Log.e(LOG_TAG, "caught " + ex);
+				showMessage("found_stale_gtalk_service");
+				mGTalkSession = null;
+				bindGTalkService();
+			}
+
+		} else {
+			ask();
+		}
+
 	}
 
 	public void ask() {
-		Intent intent = new Intent(this, Request.class);
-		intent.putExtra(Domain.Message.CENTER + "lat", 
-				mv.getMapCenter().getLatitudeE6());
-		intent.putExtra(Domain.Message.CENTER + "lon", 
-				mv.getMapCenter().getLongitudeE6());
-		intent.putExtra(Domain.Message.LEVEL, mv.getZoomLevel());
-		startActivity(intent);
+		// Intent intent = new Intent(this, Request.class);
+		// intent.putExtra(Domain.Message.CENTER + "lat", mv.getMapCenter()
+		// .getLatitudeE6());
+		// intent.putExtra(Domain.Message.CENTER + "lon", mv.getMapCenter()
+		// .getLongitudeE6());
+		// intent.putExtra(Domain.Message.LEVEL, mv.getZoomLevel());
+		startSubActivity(new Intent(this,
+				org.yexing.android.sharepath.Request.class), CODE_ASK);
 	}
 
 	public void inbox() {
@@ -484,4 +560,86 @@ public class SharePathMap extends MapActivity {
 				org.yexing.android.sharepath.Buddy.class), CODE_BUDDIES);
 	}
 
+	// gtalk 相关
+	IGTalkSession mGTalkSession = null;
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unbindService(mConnection);
+	}
+
+	private void bindGTalkService() {
+		bindService(
+				(new Intent())
+						.setComponent(com.google.android.gtalkservice.GTalkServiceConstants.GTALK_SERVICE_COMPONENT),
+				mConnection, 0);
+	}
+
+	private ServiceConnection mConnection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			// This is called when the connection with the GTalkService has been
+			// established, giving us the service object we can use to
+			// interact with the service. We are communicating with our
+			// service through an IDL interface, so get a client-side
+			// representation of that from the raw service object.
+			IGTalkService GTalkService = IGTalkService.Stub
+					.asInterface(service);
+
+			try {
+				mGTalkSession = GTalkService.getDefaultSession();
+
+				if (mGTalkSession == null) {
+					// this should not happen.
+					showMessage("gtalk_session_not_found");
+					return;
+				}
+			} catch (DeadObjectException ex) {
+				Log.e(LOG_TAG, "caught " + ex);
+				showMessage("found_stale_gtalk_service");
+			}
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			// This is called when the connection with the service has been
+			// unexpectedly disconnected -- that is, its process crashed.
+			mGTalkSession = null;
+		}
+	};
+
+	private void showMessage(CharSequence msg) {
+		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+	}
+
+	private Intent getIntentToSend(int type) {
+		Intent intent = new Intent(GTalkDataMessageReceiver.ACTION);
+
+		intent.putExtra(Domain.Message.TYPE, type);
+		try {
+			intent.putExtra(Domain.Message.FROM, mGTalkSession.getUsername());
+		} catch (DeadObjectException e) {
+			e.printStackTrace();
+		}
+		intent.putExtra(Domain.Message.START, start);
+		intent.putExtra(Domain.Message.END, end);
+		intent.putExtra(Domain.Message.LEVEL + "str", "" + mv.getZoomLevel());
+		// Log.v(LOG_TAG, "request:" + lat + " " + lon + " " + level);
+		intent.putExtra(Domain.Message.CENTER + "latstr", ""
+				+ mv.getMapCenter().getLatitudeE6());
+		intent.putExtra(Domain.Message.CENTER + "lonstr", ""
+				+ mv.getMapCenter().getLongitudeE6());
+		intent.putExtra(Domain.Message.DATE + "str", ""
+				+ System.currentTimeMillis());
+
+		KeyPoint tt;
+		String path = "";
+		for (int i = 0; i < po.showedPoints.size(); i++) {
+			tt = po.showedPoints.get(i);
+			path += "" + tt.p.x + INNER_SEPARATER + tt.p.y + INNER_SEPARATER
+					+ (tt.info == null ? "" : tt.info) + POINT_SEPARATER;
+		}
+		intent.putExtra(Domain.Message.PATH, path);
+
+		return intent;
+	}
 }

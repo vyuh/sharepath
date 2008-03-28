@@ -68,10 +68,7 @@ public class GTalkDataMessageReceiver extends IntentReceiver {
 						.parseInt(bundle.getString(Domain.Message.CENTER
 								+ "lonstr")));
 				bundle.putInt(Domain.Message.LEVEL, Integer.parseInt(bundle
-						.getString(Domain.Message.LEVEL + "str")));
-
-				Log.v(LOG_TAG, "receiver:"
-						+ bundle.getInt(Domain.Message.LEVEL));
+						.getString(Domain.Message.LEVEL + "str")));				
 
 				context.startService(
 						new Intent(context, SharePathService.class), bundle);
