@@ -150,23 +150,24 @@ public class SharePathMap extends MapActivity {
 			mCursor.first();
 
 			// 设置中点坐标
-			String[] temp = mCursor.getString(Domain.Message.CENTER_INDEX)
+			
+			String[] temp = mCursor.getString(mCursor.getColumnIndex(Domain.Message.CENTER))
 					.split(INNER_SEPARATER);
 			mc.centerMapTo(new Point(Integer.parseInt(temp[0]), Integer
 					.parseInt(temp[1])), true);
 			// 缩放
-			mc.zoomTo(mCursor.getInt(Domain.Message.LEVEL_INDEX));
+			mc.zoomTo(mCursor.getInt(mCursor.getColumnIndex(Domain.Message.LEVEL)));
 
 			// 路径信息
 			String[] temp2;
-			if (mCursor.getString(Domain.Message.PATH_INDEX) != null) {
-				temp = mCursor.getString(Domain.Message.PATH_INDEX).split(
+			String path = mCursor.getString(mCursor.getColumnIndex(Domain.Message.PATH)); 
+			if (path != null && !"".equals(path)) {
+				temp = path.split(
 						POINT_SEPARATER);
 				mv.points.clear();
 
 				// Log.v(LOG_TAG, "temp " + temp.length);
-				Log.v(LOG_TAG, "path "
-						+ mCursor.getString(Domain.Message.PATH_INDEX));
+				Log.v(LOG_TAG, "path " + path);
 
 				for (int i = 0; i < temp.length; i++) {
 					temp2 = temp[i].split(INNER_SEPARATER);
@@ -178,6 +179,8 @@ public class SharePathMap extends MapActivity {
 					mv.points.add(tt);
 				}
 			}
+			mCursor.updateInt(mCursor.getColumnIndex(Domain.Message.READ), 1);
+			mCursor.commitUpdates();
 		} else {
 
 			// 得到当前位置的gps坐标
@@ -255,16 +258,19 @@ public class SharePathMap extends MapActivity {
 				preferences = getSharedPreferences("SharePath", 0);
 				start = preferences.getString("start", "unknow");
 				end = preferences.getString("end", "unknow");
-				String to = preferences.getString("email", null);
-				
-				if (to != null) {
+				String email = preferences.getString("email", null);
+				Log.v(LOG_TAG, "emails:" + email);
+				if (email != null) {
+					String[] emails = email.split(INNER_SEPARATER);
 					try {
-						mGTalkSession.sendDataMessage(to,
+						for(int i=0; i<emails.length; i++) {
+							mGTalkSession.sendDataMessage(emails[i],
 								getIntentToSend(0));
+							Log.v(LOG_TAG, "SEND:" + i);
+						}
 						Toast.makeText(this,
 								getText(R.string.send_request_successful),
-								Toast.LENGTH_LONG).show();
-						Log.v(LOG_TAG, "send" + requestCode);
+								Toast.LENGTH_SHORT).show();
 
 					} catch (DeadObjectException ex) {
 						Log.e(LOG_TAG, "caught " + ex);
@@ -292,16 +298,14 @@ public class SharePathMap extends MapActivity {
 
 		menu.add(0, MENU_BROWSE, R.string.browse).setIcon(
 				r.getDrawable(R.drawable.browse));
-		// menu.add(0, MENU_MARK,
-		// "Mark").setIcon(r.getDrawable(R.drawable.mark));
-		menu.add(0, MENU_SEND, "Send").setIcon(r.getDrawable(R.drawable.send));
-		menu.add(0, MENU_CLEAN, "Clean").setIcon(
-				r.getDrawable(R.drawable.clean));
 		menu.add(0, MENU_ASK, "Ask").setIcon(r.getDrawable(R.drawable.ask));
-		menu.add(0, MENU_ZOOM, "Zoom").setIcon(
-				r.getDrawable(R.drawable.zoom_in));
+		menu.add(0, MENU_SEND, "Send").setIcon(r.getDrawable(R.drawable.send));
 		menu.add(0, MENU_ADDBADGE, "Add Badge").setIcon(
 				r.getDrawable(R.drawable.badge));
+		menu.add(0, MENU_ZOOM, "Zoom").setIcon(
+				r.getDrawable(R.drawable.zoom_in));
+		menu.add(0, MENU_CLEAN, "Clean").setIcon(
+				r.getDrawable(R.drawable.clean));
 		menu.add(0, MENU_SAVE, "Save").setIcon(r.getDrawable(R.drawable.save));
 		menu.add(0, MENU_LAYERS, "Layers").setIcon(
 				r.getDrawable(R.drawable.layers));
@@ -612,6 +616,8 @@ public class SharePathMap extends MapActivity {
 	}
 
 	private Intent getIntentToSend(int type) {
+		Log.v(LOG_TAG, "type:" + type);
+		
 		Intent intent = new Intent(GTalkDataMessageReceiver.ACTION);
 
 		intent.putExtra(Domain.Message.TYPE, type);

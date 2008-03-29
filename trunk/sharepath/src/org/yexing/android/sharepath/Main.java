@@ -31,7 +31,7 @@ public class Main extends ListActivity {
 
 //		addItem(list, index++ + ". test", activityIntent(
 //				"org.yexing.android.sharepath",
-//				"org.yexing.android.sharepath.Draft"));
+//				"org.yexing.android.sharepath.ChooseBuddy"));
 		
 		
 //		addItem(list, index++ + ". Ask for Directions", activityIntent(
