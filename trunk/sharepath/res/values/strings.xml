@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SharePath v0.7</string>
+    <string name="app_name">SharePath v0.8</string>
+    <string name="error">Error</string>
+    <string name="error_no_selection">Must select a boddy!</string>
+    <string name="button_ok">OK</string>
+
     <string name="request">Location</string>
     <string name="record">Record My Path</string>
     <string name="inbox">Inbox</string>
