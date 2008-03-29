@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -24,8 +25,9 @@ import android.widget.SimpleCursorAdapter.ViewBinder;
 import org.yexing.android.sharepath.domain.Domain;
 
 public class Inbox extends ListActivity {
+	private static final String LOG_TAG = "SharePath";
 	private Cursor mCursor;
-	ListAdapter adapter;
+	SimpleCursorAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -38,10 +40,45 @@ public class Inbox extends ListActivity {
 				null, null);
 
 		// Used to map notes entries from the database to views
-		adapter = new InboxAdapter(this,
-				android.R.layout.simple_list_item_2, mCursor, new String[] {
-						Domain.Message.END, Domain.Message.START }, new int[] {
-						android.R.id.text1, android.R.id.text2 });
+		adapter = new SimpleCursorAdapter(this,
+				R.layout.inbox_list, mCursor, new String[] {
+						Domain.Message.FROM, Domain.Message.END, Domain.Message.START }, new int[] {
+						R.id.image, R.id.text1, R.id.text2 });
+		adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
+
+			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+				// TODO Auto-generated method stub
+//				Log.v(LOG_TAG, "setViewValue");
+//				Log.v(LOG_TAG, "columnIndex:" + columnIndex);
+//				Log.v(LOG_TAG, "column:" + cursor.getString(columnIndex));
+				int resid = 0;
+				if(columnIndex == cursor.getColumnIndex(Domain.Message.FROM)) {
+					ImageView iv = (ImageView)view;
+					Log.v(LOG_TAG, "list type:" + cursor.getInt(cursor.getColumnIndex(Domain.Message.TYPE)));
+					if(cursor.getInt(cursor.getColumnIndex(Domain.Message.TYPE)) == 0) {
+						if(cursor.getInt(cursor.getColumnIndex(Domain.Message.READ)) == 0) {
+							resid = R.drawable.msg_ask_new;
+						} else {
+							resid = R.drawable.msg_ask_read;
+						}
+							
+					} else {
+						if(cursor.getInt(cursor.getColumnIndex(Domain.Message.READ)) == 0) {
+							resid = R.drawable.msg_reply_new;
+						} else {
+							resid = R.drawable.msg_reply_read;
+						}
+						
+					}
+					if(resid != 0) {
+						iv.setImageResource(resid);
+						return true;
+					}
+				}
+				return false;
+			}
+			
+		});
 		setListAdapter(adapter);
 	}
 
@@ -116,215 +153,11 @@ public class Inbox extends ListActivity {
 		return true;
 	}
 	
-	public class InboxAdapter extends SimpleCursorAdapter {
+	public class MessageViewBinder implements ViewBinder {
 
-		public InboxAdapter(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
-			// TODO Auto-generated constructor stub
-		}
-
-		@Override
-		public void bindView(View arg0, Context arg1, Cursor arg2) {
+		public boolean setViewValue(View arg0, Cursor arg1, int arg2) {
 			// TODO Auto-generated method stub
-			super.bindView(arg0, arg1, arg2);
-		}
-
-		@Override
-		protected String convertToString(Cursor cursor) {
-			// TODO Auto-generated method stub
-			return super.convertToString(cursor);
-		}
-
-		@Override
-		public CursorToStringConverter getCursorToStringConverter() {
-			// TODO Auto-generated method stub
-			return super.getCursorToStringConverter();
-		}
-
-		@Override
-		public FilterQueryProvider getFilterQueryProvider() {
-			// TODO Auto-generated method stub
-			return super.getFilterQueryProvider();
-		}
-
-		@Override
-		public int getStringConversionColumn() {
-			// TODO Auto-generated method stub
-			return super.getStringConversionColumn();
-		}
-
-		@Override
-		public ViewBinder getViewBinder() {
-			// TODO Auto-generated method stub
-			return super.getViewBinder();
-		}
-
-		@Override
-		protected Cursor runQuery(CharSequence arg0) {
-			// TODO Auto-generated method stub
-			return super.runQuery(arg0);
-		}
-
-		@Override
-		public void setCursorToStringConverter(
-				CursorToStringConverter cursorToStringConverter) {
-			// TODO Auto-generated method stub
-			super.setCursorToStringConverter(cursorToStringConverter);
-		}
-
-		@Override
-		public void setFilterQueryProvider(
-				FilterQueryProvider filterQueryProvider) {
-			// TODO Auto-generated method stub
-			super.setFilterQueryProvider(filterQueryProvider);
-		}
-
-		@Override
-		public void setStringConversionColumn(int stringConversionColumn) {
-			// TODO Auto-generated method stub
-			super.setStringConversionColumn(stringConversionColumn);
-		}
-
-		@Override
-		public void setViewBinder(ViewBinder viewBinder) {
-			// TODO Auto-generated method stub
-			super.setViewBinder(viewBinder);
-		}
-
-		@Override
-		public void setViewImage(ImageView v, String value) {
-			// TODO Auto-generated method stub
-			super.setViewImage(v, value);
-		}
-
-		@Override
-		public void setViewText(TextView v, String text) {
-			// TODO Auto-generated method stub
-			super.setViewText(v, text);
-		}
-
-		@Override
-		public View newDropDownView(Context context, Cursor cursor,
-				ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return super.newDropDownView(context, cursor, parent);
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return super.newView(context, cursor, parent);
-		}
-
-		@Override
-		public void setDropDownViewResource(int arg0) {
-			// TODO Auto-generated method stub
-			super.setDropDownViewResource(arg0);
-		}
-
-		@Override
-		public void changeCursor(Cursor cursor) {
-			// TODO Auto-generated method stub
-			super.changeCursor(cursor);
-		}
-
-		@Override
-		public float getAlpha(boolean focused, int offset) {
-			// TODO Auto-generated method stub
-			return super.getAlpha(focused, offset);
-		}
-
-		@Override
-		public Cursor getCursor() {
-			// TODO Auto-generated method stub
-			return super.getCursor();
-		}
-
-		@Override
-		public View getDropDownView(int position, View convertView,
-				ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return super.getDropDownView(position, convertView, parent);
-		}
-
-		@Override
-		public Filter getFilter() {
-			// TODO Auto-generated method stub
-			return super.getFilter();
-		}
-
-		@Override
-		public float getScale(boolean focused, int offset) {
-			// TODO Auto-generated method stub
-			return super.getScale(focused, offset);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return super.getView(position, convertView, parent);
-		}
-
-		@Override
-		protected void init(Cursor c, Context context, boolean autoRequery) {
-			// TODO Auto-generated method stub
-			super.init(c, context, autoRequery);
-		}
-
-		@Override
-		public boolean stableIds() {
-			// TODO Auto-generated method stub
-			return super.stableIds();
-		}
-
-		@Override
-		public boolean areAllItemsSelectable() {
-			// TODO Auto-generated method stub
-			return super.areAllItemsSelectable();
-		}
-
-		@Override
-		public View getMeasurementView(ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return super.getMeasurementView(parent);
-		}
-
-		@Override
-		public int getNewSelectionForKey(int currentSelection, int keyCode,
-				KeyEvent event) {
-			// TODO Auto-generated method stub
-			return super.getNewSelectionForKey(currentSelection, keyCode, event);
-		}
-
-		@Override
-		public boolean isSelectable(int position) {
-			// TODO Auto-generated method stub
-			return super.isSelectable(position);
-		}
-
-		@Override
-		public void notifyDataSetChanged() {
-			// TODO Auto-generated method stub
-			super.notifyDataSetChanged();
-		}
-
-		@Override
-		public void notifyDataSetInvalidated() {
-			// TODO Auto-generated method stub
-			super.notifyDataSetInvalidated();
-		}
-
-		@Override
-		public void registerDataSetObserver(DataSetObserver observer) {
-			// TODO Auto-generated method stub
-			super.registerDataSetObserver(observer);
-		}
-
-		@Override
-		public void unregisterDataSetObserver(DataSetObserver arg0) {
-			// TODO Auto-generated method stub
-			super.unregisterDataSetObserver(arg0);
+			return false;
 		}
 		
 	}

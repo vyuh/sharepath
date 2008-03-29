@@ -53,11 +53,9 @@ public class SharePathService extends Service {
 			return;
 		switch (action) {
 		case SharePathService.ACTION_SEARCH_NEW_REQUEST:
-			Log.i(LOG_TAG, "ACTION_SEARCH_NEW_MESSAGE");
 			break;
 		case SharePathService.ACTION_NEW_REQUEST:
 		{
-			Log.i(LOG_TAG, "ACTION_NEW_REQUEST");
 			ContentValues cv = createMessageValue(bundle);
 			getContentResolver().insert(Domain.Message.CONTENT_URI, cv);
 			showNotification(bundle.getString(Domain.Message.FROM));
@@ -69,9 +67,8 @@ public class SharePathService extends Service {
 			break;
 		case SharePathService.ACTION_NEW_MYMAP:
 		{
-			Log.i(LOG_TAG, "ACTION_SAVE_MAP");
 			ContentValues cv = createMessageValue(bundle);
-			cv.put(Domain.Message.TYPE, 3);
+//			cv.put(Domain.Message.TYPE, 3);
 			getContentResolver().insert(Domain.Message.CONTENT_URI, cv);
 //			showNotification(bundle.getString(Domain.Message.FROM));
 		}
@@ -143,7 +140,7 @@ public class SharePathService extends Service {
 				+ SharePathMap.INNER_SEPARATER + bundle.getInt(Domain.Message.CENTER + "lon"));
 		cv.put(Domain.Message.PATH, bundle.getString(Domain.Message.PATH));
 		
-		Log.v(LOG_TAG, "Service - path:" + bundle.getString(Domain.Message.PATH));
+		Log.v(LOG_TAG, "createMessageValue:" + bundle.getInt(Domain.Message.TYPE));
 		
 //		Log.v(LOG_TAG, "service:" + bundle.getInt(Domain.Message.CENTER
 //				+ "lat")

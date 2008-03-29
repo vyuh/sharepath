@@ -37,7 +37,7 @@ public class SharePathProvider extends ContentProvider {
 
 	private static final String TAG = "SharePathProvider";
 	private static final String DATABASE_NAME = "sharepath.db";
-	private static final int DATABASE_VERSION = 11;
+	private static final int DATABASE_VERSION = 12;
 
 
 	private static final int MESSAGE = 1;

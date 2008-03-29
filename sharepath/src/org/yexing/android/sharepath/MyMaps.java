@@ -31,9 +31,9 @@ public class MyMaps extends ListActivity {
 				"_type = 3", null, null);
 
 		adapter = new SimpleCursorAdapter(this,
-				android.R.layout.simple_list_item_2, mCursor, new String[] {
+				R.layout.mymaps_list, mCursor, new String[] {
 						Domain.Message.END, Domain.Message.START },
-				new int[] { android.R.id.text1, android.R.id.text2 });
+				new int[] { R.id.text1, R.id.text2 });
 		setListAdapter(adapter);
 	}
 
