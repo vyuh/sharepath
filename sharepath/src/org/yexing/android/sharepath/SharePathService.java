@@ -23,6 +23,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -43,17 +45,44 @@ public class SharePathService extends Service {
 	public static final int ACTION_EDIT_BUDDY = ACTION_NEW_BUDDY + 1;	
 	public static final int ACTION_DELETE_MYMAP = ACTION_EDIT_BUDDY + 1;	
 	public static final int ACTION_DELETE_ALL_MYMAPS = ACTION_DELETE_MYMAP + 1;	
+	public static final int ACTION_READ_MESSAGE = ACTION_DELETE_ALL_MYMAPS + 1;	
 
 	@Override
 	protected void onStart(int startId, Bundle bundle) {
 		// TODO Auto-generated method stub
 		super.onStart(startId, bundle);
 		int action = bundle.getInt("action");
-		if (action == 0)
+		Log.v(LOG_TAG, "service start:" + action);
+		if (action == 0) {
 			return;
+		}
 		switch (action) {
 		case SharePathService.ACTION_SEARCH_NEW_REQUEST:
+		{
+			Cursor cursor = getContentResolver().query(Domain.Message.CONTENT_URI,
+					null, Domain.Message.READ + "=0 and " 
+					+ Domain.Message.TYPE + "<2", null, null);
+			Log.v(LOG_TAG, "islast:" + cursor.isLast());
+			Log.v(LOG_TAG, "count 1:" + cursor.count());
+			cursor.first();
+			Log.v(LOG_TAG, "count 2:" + cursor.count());
+			if(cursor.count() > 0) {
+				showNotification(getString(R.string.msg_not_read));
+			} else {
+				cleanNotification();
+			}
 			break;
+		}
+		case SharePathService.ACTION_READ_MESSAGE:
+		{
+			Cursor cursor = getContentResolver().query(Domain.Message.CONTENT_URI,
+					null, Domain.Message.READ + "=0 and " 
+					+ Domain.Message.TYPE + "<2", null, null);
+			if(cursor.count() == 0) {
+				cleanNotification();
+			}
+			break;
+		}
 		case SharePathService.ACTION_NEW_REQUEST:
 		{
 			ContentValues cv = createMessageValue(bundle);
@@ -161,26 +190,17 @@ public class SharePathService extends Service {
 	 * bar.
 	 */
 	protected void showNotification(String from) {
-		// look up the notification manager service
 		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-		// What happens when we click the notification in the expanded status
-		// bar. In this
-		// case, we launch the IncomingMessageView activity.
-		Intent contentIntent = new Intent(this, SharePathService.class);
+		Intent contentIntent = new Intent(this, 
+				org.yexing.android.sharepath.Inbox.class);
 
-		// The ticker text, this uses a formatted string so our message could be
-		// localized
 		String tickerText = getString(R.string.imcoming_message_ticker_text,
 				from);
 
-		// What happens when we click the app icon -- we'll just launch the SMS
-		// Inbox for
-		// the purposes of this demo
 		Intent appIntent = new Intent(this,
 				org.yexing.android.sharepath.Main.class);
 
-		// construct the Notification object.
 		Notification notif = new Notification(this, // our context
 				R.drawable.notify_icon, // the icon for the status bar
 				tickerText, // the text to display in the ticker
@@ -193,16 +213,13 @@ public class SharePathService extends Service {
 				getText(R.string.app_name), // the name of the app
 				appIntent);
 
-		// after a 100ms delay, vibrate for 250ms, pause for 100 ms and
-		// then vibrate for 500ms.
 		notif.vibrate = new long[] { 100, 250, 100, 500 };
 
-		// Note that we use R.layout.incoming_message_panel as the ID for
-		// the notification. It could be any integer you want, but we use
-		// the convention of using a resource id for a string related to
-		// the notification. It will always be a unique number within your
-		// application.
 		nm.notify(R.string.imcoming_message_ticker_text, notif);
 	}
 
+	protected void cleanNotification() {
+		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		nm.cancel(R.string.imcoming_message_ticker_text);
+	}
 }

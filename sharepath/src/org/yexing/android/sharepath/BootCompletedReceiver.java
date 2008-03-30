@@ -12,10 +12,8 @@ import android.widget.Toast;
 public class BootCompletedReceiver extends IntentReceiver {
 	private static final String LOG_TAG = "SharePath";
 
-	static final String ACTION = "android.intent.action.BOOT_COMPLETED";
-
 	public void onReceiveIntent(Context context, Intent intent) {
-		if (intent.getAction().equals(ACTION)) {
+		if (intent.getAction().equals(Intent.BOOT_COMPLETED_ACTION)) {
 			String info = "boot completed!";
 			Log.i(LOG_TAG, info);
 			

@@ -181,6 +181,10 @@ public class SharePathMap extends MapActivity {
 			}
 			mCursor.updateInt(mCursor.getColumnIndex(Domain.Message.READ), 1);
 			mCursor.commitUpdates();
+			Bundle bundle = new Bundle();
+			bundle.putInt("action", SharePathService.ACTION_READ_MESSAGE);
+			startService(new Intent(SharePathMap.this,
+					SharePathService.class), bundle);
 		} else {
 
 			// 得到当前位置的gps坐标
