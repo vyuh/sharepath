@@ -38,7 +38,12 @@
 		<activity android:name="SharePathMap" android:label="@string/app_name" />
 		<activity android:name="Request" android:label="@string/request"
 			android:theme="@android:style/Theme.Dialog" />
-		<activity android:name="Inbox" android:label="@string/inbox"/>
+		<activity android:name="Inbox" android:label="@string/inbox">
+		    <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.EMBED" />
+            </intent-filter>
+		</activity>
 		<activity android:name="MyMaps" android:label="@string/mymaps" />
 		<activity android:name="Buddy" android:label="@string/buddy" />
 		<activity android:name="ChooseBuddy" android:label="@string/buddy"
@@ -70,4 +75,6 @@
 	</uses-permission>
 	<uses-permission
 		android:name="com.google.android.xmppService.permission.XMPP_SERVICE" />
+    <uses-permission android:name="com.google.android.gtalkservice.permission.GTALK_SERVICE" />
+    <uses-permission android:name="android.permission.RUN_INSTRUMENTATION" />
 </manifest>

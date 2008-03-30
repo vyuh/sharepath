@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.View.MeasureSpec;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -24,8 +25,8 @@ public class Main extends ListActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 //		requestWindowFeature(Window.FEATURE_NO_TITLE);
-//		setupListStripes();
-		// setContentView(R.layout.main);
+		setContentView(R.layout.main);
+
 		List<Map> list = new ArrayList<Map>();
 		int index = 1;
 
@@ -59,6 +60,15 @@ public class Main extends ListActivity {
 		setListAdapter(new SimpleAdapter(this, list,
 				android.R.layout.simple_list_item_1, new String[] { "title" },
 				new int[] { android.R.id.text1 }));
+		
+//		Button btnBoot = (Button) findViewById(R.id.boot);
+//		btnBoot.setOnClickListener(new View.OnClickListener() {
+//
+//			public void onClick(View v) {
+//				Intent intent = new Intent(Intent.BOOT_COMPLETED_ACTION);
+//				broadcastIntent(intent);
+//			}
+//		});
 	}
 
 //	/**
