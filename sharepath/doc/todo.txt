@@ -1,0 +1,46 @@
+
+回复请求界面的menu
+
+编辑map的时候把中点定义到当前gps点上 需要移动路径
+
+局部放大功能
+
+
+把所有的字符串改成资源模式
+
+drop 所有操作安排到map页面的菜单中，如果可能，使用android的主菜单模式
+
+ok 请求已读状态 list显示图标
+
+ok 在request中等待choosebuddy返回好友的gtalk id，然后执行发送操作
+
+ok 可以去掉path了，直接用list
+
+ok po的参数直接用mv
+
+ok m转回n出错
+
+ok map界面增加菜单
+
+ok 请求的存储和提示 必须要在service里面存储，不能在reciever中
+
+ok 请求的时候取得地图信息（center, level)
+
+ok 修改mark的图标
+
+ok 路径的编辑
+
+ok 好友的编辑 点击编辑
+
+ok 直接发送路径 send()
+
+
+dexdump -d -f -h system@app@Contacts.apk@classes.dex >> Contacts.apk.dump
+
+Watching content provider for changes Options 
+
+http://groups.google.com/group/android-developers/browse_thread/thread/35beeb21596c9890/dc9b67de25a3a553?#dc9b67de25a3a553
+
+How can I put custom views in a list? And have it work correctly? Options 
+
+http://groups.google.com/group/android-developers/browse_thread/thread/2d76dc4dd4bc975a/6758a309f465758b?#6758a309f465758b
