@@ -1,0 +1,9 @@
+0.9
+  1. improved the notifiction. The notifiction could turn to the
+     right state, when bootup completed, new message comes up or 
+     messge is read; When click on the notifiction icon, it can 
+     link to the right activity.
+
+0.8
+  1. Make buddy list multiple selectedable.
+  2. And an icon to inbox list to sign out read or not.
