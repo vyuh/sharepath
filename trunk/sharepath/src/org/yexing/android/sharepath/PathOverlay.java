@@ -1,7 +1,6 @@
 package org.yexing.android.sharepath;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.content.Resources;
 import android.graphics.Canvas;
@@ -44,6 +43,8 @@ public class PathOverlay extends Overlay {
 	public PathOverlay(Resources r, MarkableMapView mv, int screenWidth,
 			int screenHeight) {
 
+		Log.v(LOG_TAG, "PathOverlay");
+		
 		this.mv = mv;
 
 		// 载入显示转折点的三个标志label

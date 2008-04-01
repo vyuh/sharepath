@@ -24,11 +24,9 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.xml.dom.InnerNodeImpl;
 
 public class SharePathService extends Service {
 	private static final String LOG_TAG = "SharePath";

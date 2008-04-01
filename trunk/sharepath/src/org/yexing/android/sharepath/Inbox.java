@@ -1,25 +1,16 @@
 package org.yexing.android.sharepath;
 
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Menu.Item;
-import android.widget.Filter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
-import android.widget.SimpleCursorAdapter.CursorToStringConverter;
-import android.widget.SimpleCursorAdapter.FilterQueryProvider;
 import android.widget.SimpleCursorAdapter.ViewBinder;
 
 import org.yexing.android.sharepath.domain.Domain;

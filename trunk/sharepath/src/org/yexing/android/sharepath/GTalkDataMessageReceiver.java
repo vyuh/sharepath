@@ -21,35 +21,8 @@ import org.yexing.android.sharepath.domain.Domain;
 import android.content.IntentReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.util.Log;
-import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
-
-/**
- * <p>
- * Example of using the GTalkService{@link com.google.android.gtalkservice.IGTalkService}
- * to receive peer to peer data messages. This demonstrates how to use the
- * GTalkService to receive data to/from another Android device.
- * </p>
- * 
- * <h4>Demo</h4>
- * App/Service/GTalk Data Message Receiver
- * 
- * <h4>Source files</h4>
- * <table class="LinkTable">
- * <tr>
- * <td class="LinkColumn">src/com/google/android/samples/app/GTalkDataMessageReceiver.java</td>
- * <td class="DescrColumn">The GTalkService data message receiver</td>
- * </tr>
- * <tr>
- * <td class="LinkColumn">src/com/google/android/samples/app/GTalkDataMessageSender.java</td>
- * <td class="DescrColumn">The GTalkService data message Sender</td>
- * </tr>
- * </table>
- * 
- */
 public class GTalkDataMessageReceiver extends IntentReceiver {
 	private static final String LOG_TAG = "SharePath";
 
@@ -57,6 +30,7 @@ public class GTalkDataMessageReceiver extends IntentReceiver {
 	public static final String ACTION = "android.intent.action.SHAREPATH_MESSAGE";
 
 	public void onReceiveIntent(Context context, Intent intent) {
+		Log.v(LOG_TAG, "GTalkDataMessageReceiver.onReceiveIntent");
 		if (intent.getAction().equals(ACTION)) {
 			Bundle bundle = intent.getExtras();
 			if (bundle != null) {

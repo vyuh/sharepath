@@ -3,13 +3,9 @@ package org.yexing.android.sharepath;
 import java.util.ArrayList;
 import java.util.Map;
 
-
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -21,7 +17,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewInflate;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -30,6 +25,8 @@ import android.widget.EditText;
  *
  */
 public class MarkableMapView extends MapView {
+	private static final String LOG_TAG = "SharePath";
+
 	int left = 0, top = 0, right = 0, bottom = 0;
 
 	boolean marking = false; //是否处在标图状态
@@ -55,6 +52,8 @@ public class MarkableMapView extends MapView {
 	public MarkableMapView(Context context, AttributeSet attrs, Map inflateParams) {
 		super(context, attrs, inflateParams);
 
+		Log.v(LOG_TAG, "MarkableMapView");
+		
 		this.context = context;
 		
 		//路径样式
@@ -78,27 +77,57 @@ public class MarkableMapView extends MapView {
 		this.right = right;
 		this.bottom = bottom;
 	}
+	
+	boolean bZoom = false;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
-		if (marking == true) {
+//		if (marking == true) {
+		
+		
 			int action = ev.getAction();
-			// //Log.d("SharePath", "n action=" + action + "
-			// MotionEvent.ACTION_DOWN =" + MotionEvent.ACTION_DOWN);
+			
+			Log.v(LOG_TAG, "action:" + action);
+			
 			int x = (int) ev.getX();
 			int y = (int) ev.getY();
-			if (action == MotionEvent.ACTION_UP) {
-				KeyPoint tt = new KeyPoint(new Point(x, y), null);
-				points.add(tt);
+			
+			if(action == MotionEvent.ACTION_DOWN) {
+				
 			}
-			// //Log.d("SharePath", "onTouchEvent L:" + left + " T:" + top + " R:"
-			// + right
-			// + " B:" + bottom);
+			if(action == MotionEvent.ACTION_MOVE) {
+//				ev.addBatch(100, 100, 1, 1);
+//				Log.v(LOG_TAG, "addBatch");
+				
+				// zoom
+				if(ev.getHistorySize() > 0) {
+					bZoom = false;
+				} else {
+					bZoom = true;
+				}
+//				Log.v(LOG_TAG, "historical size:" + ev.getHistorySize());
+				// end zoom
+			}
+			
+			if (action == MotionEvent.ACTION_UP) {
+				Log.d(LOG_TAG, "UP x:" + x + " y:" + y
+						+ " R:"	+ right + " B:" + bottom);
+
+//				KeyPoint tt = new KeyPoint(new Point(x, y), null);
+//				points.add(tt);
+				
+				// zoom
+				if(bZoom == true) {
+					displayZoomDialog(x, y);
+				}
+				bZoom = true;
+				// end zoom
+			}
 			invalidate();
 			return true;
-		} else {
-			return super.onTouchEvent(ev);
-		}
+//		} else {
+//			return super.onTouchEvent(ev);
+//		}
 	}
 
 	

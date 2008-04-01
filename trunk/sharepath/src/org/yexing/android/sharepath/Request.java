@@ -1,39 +1,21 @@
 package org.yexing.android.sharepath;
 
-import org.yexing.android.sharepath.domain.Domain;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.DeadObjectException;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gtalkservice.IGTalkService;
-import com.google.android.gtalkservice.IGTalkSession;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Point;
 
 public class Request extends Activity {
 	private static final String LOG_TAG = "SharePath";
 
-	IGTalkSession mGTalkSession = null;
+//	IGTalkSession mGTalkSession = null;
 	String mTextPref;
 
 	EditText etStart;
@@ -48,6 +30,7 @@ public class Request extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		Log.v(LOG_TAG, "Request.onCreate");
 		setContentView(R.layout.request);
 
 //		// 检查启动参数
