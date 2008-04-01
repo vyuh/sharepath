@@ -20,6 +20,7 @@ public class EditBuddy extends Activity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
+		Log.v(LOG_TAG, "edit budy");
 		super.onCreate(icicle);
 
 		// Use a custom layout file

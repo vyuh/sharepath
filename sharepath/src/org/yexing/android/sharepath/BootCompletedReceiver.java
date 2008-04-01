@@ -3,11 +3,8 @@ package org.yexing.android.sharepath;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentReceiver;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 public class BootCompletedReceiver extends IntentReceiver {
 	private static final String LOG_TAG = "SharePath";

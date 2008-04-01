@@ -1,33 +1,38 @@
 package org.yexing.android.sharepath;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
-import android.view.Window;
-import android.view.View.MeasureSpec;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.view.ViewInflate;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class Main extends ListActivity {
-	
+	private static final String LOG_TAG = "SharePath";
+
+	List<Map<String, Object>> list;
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 //		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		List<Map> list = new ArrayList<Map>();
+		list = new ArrayList<Map<String, Object>>();
 		int index = 1;
 
 //		addItem(list, index++ + ". test", activityIntent(
@@ -57,10 +62,11 @@ public class Main extends ListActivity {
 				"org.yexing.android.sharepath",
 				"org.yexing.android.sharepath.Buddy"));
 
-		setListAdapter(new SimpleAdapter(this, list,
-				android.R.layout.simple_list_item_1, new String[] { "title" },
+		setListAdapter(new ImageSimpleAdapter(this, list,
+				R.layout.main_list, new String[] { "title" },
 				new int[] { android.R.id.text1 }));
 		
+		// Ä£ÄâbootupµÄ°´Å¥
 //		Button btnBoot = (Button) findViewById(R.id.boot);
 //		btnBoot.setOnClickListener(new View.OnClickListener() {
 //
@@ -70,30 +76,6 @@ public class Main extends ListActivity {
 //			}
 //		});
 	}
-
-//	/**
-//	 * Add stripes to the list view.
-//	 */
-//	private void setupListStripes() {
-//		// Get Drawables for alternating stripes
-//		Drawable[] lineBackgrounds = new Drawable[2];
-//
-//		lineBackgrounds[0] = getResources().getDrawable(R.drawable.even_stripe);
-//		lineBackgrounds[1] = getResources().getDrawable(R.drawable.odd_stripe);
-//
-//		// Make and measure a sample TextView of the sort our adapter will
-//		// return
-//		View view = getViewInflate().inflate(
-//				android.R.layout.simple_list_item_1, null, null);
-//
-//		TextView v = (TextView) view.findViewById(android.R.id.text1);
-//		v.setText("X");
-//		// Make it 100 pixels wide, and let it choose its own height.
-//		v.measure(MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
-//				MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-//		int height = v.getMeasuredHeight();
-//		getListView().setStripes(lineBackgrounds, height);
-//	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -105,7 +87,7 @@ public class Main extends ListActivity {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void addItem(List<Map> data, String name, Intent intent) {
+	protected void addItem(List<Map<String, Object>> data, String name, Intent intent) {
 		Map<String, Object> temp = new HashMap<String, Object>();
 		temp.put("title", name);
 		temp.put("intent", intent);
@@ -116,5 +98,47 @@ public class Main extends ListActivity {
 		Intent result = new Intent();
 		result.setClassName(pkg, componentName);
 		return result;
+	}
+	
+	class ImageSimpleAdapter extends SimpleAdapter {
+
+		public ImageSimpleAdapter(Context context, List data, int resource,
+				String[] from, int[] to) {
+			super(context, data, resource, from, to);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return list.size();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			if(convertView == null) {
+		        ViewInflate inflate = (ViewInflate) getSystemService(Context.INFLATE_SERVICE);
+		        convertView = inflate.inflate(R.layout.main_list, null, null);
+		        TextView tv = (TextView)convertView.findViewById(R.id.text1);
+		        tv.setText((String)list.get(position).get("title"));
+		        ImageView iv = (ImageView)convertView.findViewById(R.id.image);
+//		        iv.setImageResource(R.drawable.badge);
+		        Uri uri = Uri.parse("http://www.yexing.org/image.axd?picture=browse.png");
+		        
+//		        iv.setImageURI(uri);
+//		        Drawable drawable = Drawable.createFromPath(uri.getPath());
+		        try {
+			        URL url = new URL("http://www.yexing.org/image.axd?picture=browse.png");
+			        InputStream is = url.openStream();
+			        Drawable drawable = Drawable.createFromStream(is, "none");
+			        iv.setImageDrawable(drawable);
+		        } catch(Exception e) {
+		        	Log.e(LOG_TAG, "load image error! \n" + e.toString());
+		        }
+			}
+			return convertView; //super.getView(position, convertView, parent);
+		}
+		
 	}
 }
