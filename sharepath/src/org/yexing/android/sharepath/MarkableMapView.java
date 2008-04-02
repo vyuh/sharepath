@@ -50,6 +50,8 @@ public class MarkableMapView extends MapView {
 
 	Dialog badgeDialog; //用来输入提示信息的对话框
 	
+	int lastZoomLevel;
+	
 	public MarkableMapView(Context context, AttributeSet attrs, Map inflateParams) {
 		super(context, attrs, inflateParams);
 
@@ -89,6 +91,9 @@ public class MarkableMapView extends MapView {
 	Point pCenter; //down操作发生时的地图中点
 	int latspan;
 	int lonspan;
+	
+	long lastClick = 0; //上次点击的时间
+	long clickDurence = 300; //两次点击间隔的时间(ms)，小于这个时间视为双击
 	
 	boolean bNormalMove = false; //普通的拖动地图操作不做处理
 	@Override
@@ -162,7 +167,7 @@ public class MarkableMapView extends MapView {
 			if (action == MotionEvent.ACTION_UP) {
 				Log.d(LOG_TAG, "UP x:" + x + " y:" + y
 						+ " R:"	+ right + " B:" + bottom);
-
+				
 				if(bBorder && bMoved) {
 					if(oldY > y) {
 						getController().zoomTo(getZoomLevel()
@@ -171,9 +176,15 @@ public class MarkableMapView extends MapView {
 						getController().zoomTo(getZoomLevel()
 								+ (y - oldY)/borderSize);						
 					}
+					lastZoomLevel = getZoomLevel();
+					
 				} else if(!bMoved) {
-					KeyPoint tt = new KeyPoint(new android.graphics.Point(x, y), null);
-					points.add(tt);
+					if(ev.getEventTime() - ev.getDownTime() < clickDurence) {
+						KeyPoint tt = new KeyPoint(new android.graphics.Point(x, y), null);
+						points.add(tt);						
+					} else {
+						
+					}
 				} else {
 //					return super.onTouchEvent(ev);
 				}

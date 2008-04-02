@@ -199,6 +199,7 @@ public class SharePathMap extends MapActivity {
 			mc.zoomTo(16);
 		}
 
+		mv.lastZoomLevel = mv.getZoomLevel();
 		po = new PathOverlay(r, mv, screenWidth, screenHeight);
 		if (navfrom != 0) {
 			po.start = start;

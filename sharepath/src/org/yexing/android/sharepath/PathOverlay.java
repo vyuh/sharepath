@@ -85,6 +85,7 @@ public class PathOverlay extends Overlay {
 		}
 
 		if (mv.points != null) {
+			lastlevel = mv.lastZoomLevel;
 			zoomlevel = mv.getZoomLevel();
 			Log.v(LOG_TAG, "drawpath last:" + lastlevel + " cur:" +
 					zoomlevel);
