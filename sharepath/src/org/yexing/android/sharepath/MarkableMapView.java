@@ -9,9 +9,10 @@ import android.graphics.Bitmap;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
+
 
 import com.google.android.maps.MapView;
+import com.google.android.maps.Point;
 
 import android.util.AttributeSet;
 import android.util.Log;
@@ -76,54 +77,114 @@ public class MarkableMapView extends MapView {
 		this.top = top;
 		this.right = right;
 		this.bottom = bottom;
+		Log.v(LOG_TAG, "left:" + left + " top:" + top
+				+ " right:" + right + " bottom:" + bottom);
 	}
 	
-	boolean bZoom = false;
-
+//	boolean bZoom = false;
+	boolean bMoved = false; //用户是否采取了移动操作
+	boolean bBorder = false; //action的位置是否在屏幕左右两侧边缘（目前不需要上下边缘）
+	int borderSize = 20; //定义边缘的宽度，宽度以内的即属于屏幕边缘
+	int oldX, oldY; //记录down操作发生时的位置，以便在up操作发生时进行比较
+	Point pCenter; //down操作发生时的地图中点
+	int latspan;
+	int lonspan;
+	
+	boolean bNormalMove = false; //普通的拖动地图操作不做处理
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 //		if (marking == true) {
 		
 		
 			int action = ev.getAction();
-			
-			Log.v(LOG_TAG, "action:" + action);
-			
 			int x = (int) ev.getX();
 			int y = (int) ev.getY();
+//			Log.v(LOG_TAG, "action:" + action + " x:" + x + " y:" + y);
+			
 			
 			if(action == MotionEvent.ACTION_DOWN) {
+				oldX = x;
+				oldY = y;
+				bMoved = false;
+				pCenter = getMapCenter();
 				
+				//检测是否点击在边缘
+				if(right - x < borderSize || x < borderSize) {
+					bBorder = true;
+				} else {
+					bBorder = false;
+				}
+				
+				if(bNormalMove) { //如果上一个操作是普通的移动地图，直接返回系统缺省结果
+//					return super.onTouchEvent(ev);
+				}
+				
+				latspan = getLatitudeSpan();
+				lonspan = getLongitudeSpan();
+				Log.v(LOG_TAG, "lat:" + latspan + " lon:" + lonspan);
 			}
 			if(action == MotionEvent.ACTION_MOVE) {
+				bMoved = true;
+				
+				if(right - x > borderSize && x > borderSize) {
+					bBorder = false;
+					bNormalMove = true;
+				}
+				if(!bBorder) {
+					Log.v(LOG_TAG, "out of border");
+					
+//					return super.onTouchEvent(ev);
+//					getController().animateTo(new com.google.android.maps.Point(100, 100));
+					
+					int deltaX = lonspan / right * (x - oldX);
+					int deltaY = latspan / bottom * (y - oldY);
+					Log.v(LOG_TAG, "dx:" + deltaX + " dy:" + deltaY);
+					
+					getController().animateTo(new Point(pCenter.getLatitudeE6() + deltaY,
+							pCenter.getLongitudeE6() - deltaX));//, true);
+					
+				}
+
 //				ev.addBatch(100, 100, 1, 1);
 //				Log.v(LOG_TAG, "addBatch");
 				
-				// zoom
-				if(ev.getHistorySize() > 0) {
-					bZoom = false;
-				} else {
-					bZoom = true;
-				}
-//				Log.v(LOG_TAG, "historical size:" + ev.getHistorySize());
-				// end zoom
+//				// zoom
+//				if(ev.getHistorySize() > 0) {
+//					bZoom = false;
+//				} else {
+//					bZoom = true;
+//				}
+////				Log.v(LOG_TAG, "historical size:" + ev.getHistorySize());
+//				// end zoom
+//				invalidate();
 			}
 			
 			if (action == MotionEvent.ACTION_UP) {
 				Log.d(LOG_TAG, "UP x:" + x + " y:" + y
 						+ " R:"	+ right + " B:" + bottom);
 
-//				KeyPoint tt = new KeyPoint(new Point(x, y), null);
-//				points.add(tt);
-				
-				// zoom
-				if(bZoom == true) {
-					displayZoomDialog(x, y);
+				if(bBorder && bMoved) {
+					if(oldY > y) {
+						getController().zoomTo(getZoomLevel()
+								- (oldY - y)/borderSize);
+					} else {
+						getController().zoomTo(getZoomLevel()
+								+ (y - oldY)/borderSize);						
+					}
+				} else if(!bMoved) {
+					KeyPoint tt = new KeyPoint(new android.graphics.Point(x, y), null);
+					points.add(tt);
+				} else {
+//					return super.onTouchEvent(ev);
 				}
-				bZoom = true;
-				// end zoom
+//				// zoom
+//				if(bZoom == true) {
+//					displayZoomDialog(x, y);
+//				}
+//				bZoom = true;
+//				// end zoom
+				invalidate();
 			}
-			invalidate();
 			return true;
 //		} else {
 //			return super.onTouchEvent(ev);
