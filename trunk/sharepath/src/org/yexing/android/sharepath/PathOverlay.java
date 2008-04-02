@@ -86,8 +86,8 @@ public class PathOverlay extends Overlay {
 
 		if (mv.points != null) {
 			zoomlevel = mv.getZoomLevel();
-			// Log.v("SharePath", "drawpath last:" + lastlevel + " cur:" +
-			// zoomlevel);
+			Log.v(LOG_TAG, "drawpath last:" + lastlevel + " cur:" +
+					zoomlevel);
 			// Log.i("SharePath", "points count:" + mv.points.size());
 
 			// 计算地图中点的屏幕坐标，即路径中点的屏幕坐标

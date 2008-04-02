@@ -128,14 +128,14 @@ public class Main extends ListActivity {
 		        
 //		        iv.setImageURI(uri);
 //		        Drawable drawable = Drawable.createFromPath(uri.getPath());
-		        try {
-			        URL url = new URL("http://www.yexing.org/image.axd?picture=browse.png");
-			        InputStream is = url.openStream();
-			        Drawable drawable = Drawable.createFromStream(is, "none");
-			        iv.setImageDrawable(drawable);
-		        } catch(Exception e) {
-		        	Log.e(LOG_TAG, "load image error! \n" + e.toString());
-		        }
+//		        try {
+//			        URL url = new URL("http://www.yexing.org/image.axd?picture=browse.png");
+//			        InputStream is = url.openStream();
+//			        Drawable drawable = Drawable.createFromStream(is, "none");
+//			        iv.setImageDrawable(drawable);
+//		        } catch(Exception e) {
+//		        	Log.e(LOG_TAG, "load image error! \n" + e.toString());
+//		        }
 			}
 			return convertView; //super.getView(position, convertView, parent);
 		}
