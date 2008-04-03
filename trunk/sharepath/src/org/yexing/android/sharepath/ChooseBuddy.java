@@ -12,8 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -25,8 +27,8 @@ public class ChooseBuddy extends ListActivity {
 	private Cursor mCursor;
 	private Uri mURI;
 
-//	EditText etName;
-//	EditText etEmail;
+	EditText etName;
+	EditText etEmail;
 	Map<String, Object> selectedBuddies = new HashMap<String, Object>();
 
 	/** Called when the activity is first created. */
@@ -40,8 +42,24 @@ public class ChooseBuddy extends ListActivity {
 		// Tell the list view which view to display when the list is empty
 		getListView().setEmptyView(findViewById(R.id.empty));
 
-//		etName = (EditText) findViewById(R.id.name);
-//		etEmail = (EditText) findViewById(R.id.email);
+		etName = (EditText) findViewById(R.id.name);
+		etEmail = (EditText) findViewById(R.id.email);
+		etName.setOnFocusChangeListener(new OnFocusChangeListener() {
+			public void onFocusChanged(android.view.View arg0, boolean arg1) {
+				if (arg1 == true) {
+					etName.selectAll();
+				}
+
+			}
+		});
+		etEmail.setOnFocusChangeListener(new OnFocusChangeListener() {
+			public void onFocusChanged(android.view.View arg0, boolean arg1) {
+				if (arg1 == true) {
+					etEmail.setSelection(0, etEmail.getText().toString().indexOf("@"));
+				}
+
+			}
+		});
 
 		Cursor c = getContentResolver().query(Domain.Buddy.CONTENT_URI, null,
 				null, null, null);
@@ -57,23 +75,23 @@ public class ChooseBuddy extends ListActivity {
 
 		// Log.v("SharePath", "view count:" + adapter.getCount());
 
-//		// 添加好友
-//		Button add = (Button) findViewById(R.id.add);
-//		add.setOnClickListener(new View.OnClickListener() {
-//
-//			public void onClick(View v) {
-//				mURI = getContentResolver().insert(Domain.Buddy.CONTENT_URI,
-//						null);
-//				Log.d("SharePath", mURI.toString());
-//				mCursor = managedQuery(mURI, null, null, null, null);
-//				mCursor.first();
-//				mCursor.updateString(Domain.Buddy.EMAIL_INDEX, etEmail
-//						.getText().toString());
-//				mCursor.updateString(Domain.Buddy.NAME_INDEX, etName.getText()
-//						.toString());
-//				managedCommitUpdates(mCursor);
-//			}
-//		});
+		// 快速添加好友
+		Button add = (Button) findViewById(R.id.add);
+		add.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				mURI = getContentResolver().insert(Domain.Buddy.CONTENT_URI,
+						null);
+				Log.d("SharePath", mURI.toString());
+				mCursor = managedQuery(mURI, null, null, null, null);
+				mCursor.first();
+				mCursor.updateString(Domain.Buddy.EMAIL_INDEX, etEmail
+						.getText().toString());
+				mCursor.updateString(Domain.Buddy.NAME_INDEX, etName.getText()
+						.toString());
+				managedCommitUpdates(mCursor);
+			}
+		});
 
 		// 放弃
 		Button btnCancel = (Button) findViewById(R.id.cancel1);

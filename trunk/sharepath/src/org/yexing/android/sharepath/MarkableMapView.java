@@ -98,8 +98,6 @@ public class MarkableMapView extends MapView {
 	boolean bNormalMove = false; //普通的拖动地图操作不做处理
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
-//		if (marking == true) {
-		
 		
 			int action = ev.getAction();
 			int x = (int) ev.getX();
@@ -119,11 +117,7 @@ public class MarkableMapView extends MapView {
 				} else {
 					bBorder = false;
 				}
-				
-				if(bNormalMove) { //如果上一个操作是普通的移动地图，直接返回系统缺省结果
-//					return super.onTouchEvent(ev);
-				}
-				
+								
 				latspan = getLatitudeSpan();
 				lonspan = getLongitudeSpan();
 				Log.v(LOG_TAG, "lat:" + latspan + " lon:" + lonspan);
@@ -138,9 +132,6 @@ public class MarkableMapView extends MapView {
 				if(!bBorder) {
 					Log.v(LOG_TAG, "out of border");
 					
-//					return super.onTouchEvent(ev);
-//					getController().animateTo(new com.google.android.maps.Point(100, 100));
-					
 					int deltaX = lonspan / right * (x - oldX);
 					int deltaY = latspan / bottom * (y - oldY);
 					Log.v(LOG_TAG, "dx:" + deltaX + " dy:" + deltaY);
@@ -149,26 +140,14 @@ public class MarkableMapView extends MapView {
 							pCenter.getLongitudeE6() - deltaX));//, true);
 					
 				}
-
-//				ev.addBatch(100, 100, 1, 1);
-//				Log.v(LOG_TAG, "addBatch");
-				
-//				// zoom
-//				if(ev.getHistorySize() > 0) {
-//					bZoom = false;
-//				} else {
-//					bZoom = true;
-//				}
-////				Log.v(LOG_TAG, "historical size:" + ev.getHistorySize());
-//				// end zoom
-//				invalidate();
 			}
 			
 			if (action == MotionEvent.ACTION_UP) {
 				Log.d(LOG_TAG, "UP x:" + x + " y:" + y
 						+ " R:"	+ right + " B:" + bottom);
-				
 				if(bBorder && bMoved) {
+					lastZoomLevel = getZoomLevel();
+					
 					if(oldY > y) {
 						getController().zoomTo(getZoomLevel()
 								- (oldY - y)/borderSize);
@@ -176,30 +155,31 @@ public class MarkableMapView extends MapView {
 						getController().zoomTo(getZoomLevel()
 								+ (y - oldY)/borderSize);						
 					}
-					lastZoomLevel = getZoomLevel();
 					
 				} else if(!bMoved) {
-					if(ev.getEventTime() - ev.getDownTime() < clickDurence) {
-						KeyPoint tt = new KeyPoint(new android.graphics.Point(x, y), null);
-						points.add(tt);						
-					} else {
+					if(ev.getEventTime() - ev.getDownTime() < clickDurence) { // 点击 非长按
+						if(ev.getEventTime() - lastClick > clickDurence) { // 单击
+							KeyPoint tt = new KeyPoint(screenToGeo(x, y), null);
+							points.add(tt);	
+						} else { // 双击
+							if(points.size()==1) {
+								points.remove(0);
+							} else {
+								points.remove(points.size()-1);
+								points.remove(points.size()-1);
+							}
+							
+						}
+					} else { // 长按 在已有点上 添加badge 否则send,save,clean
 						
 					}
-				} else {
-//					return super.onTouchEvent(ev);
+					Log.v(LOG_TAG, "event:" + ev.getEventTime() + " last:" + lastClick);
 				}
-//				// zoom
-//				if(bZoom == true) {
-//					displayZoomDialog(x, y);
-//				}
-//				bZoom = true;
-//				// end zoom
 				invalidate();
+				lastClick = ev.getEventTime();
 			}
 			return true;
-//		} else {
-//			return super.onTouchEvent(ev);
-//		}
+
 	}
 
 	
@@ -238,5 +218,18 @@ public class MarkableMapView extends MapView {
 
 	}
 	
+	public Point screenToGeo(int x, int y) {
+		int latspan = getLatitudeSpan();
+		int lonspan = getLongitudeSpan();
+		
+		int deltaX = lonspan / right * (x - right/2);
+		int deltaY = latspan / bottom * (y - bottom/2);
+		Log.v(LOG_TAG, "screenToGeo: deltaX:" + deltaX + " deltaY:" + deltaY);
+
+		Point geoPoint = new Point(this.getMapCenter().getLatitudeE6() - deltaY, 
+				this.getMapCenter().getLongitudeE6() + deltaX);
+		
+		return geoPoint;
+	}
 	
 }
