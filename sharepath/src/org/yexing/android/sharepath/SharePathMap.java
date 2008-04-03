@@ -301,14 +301,14 @@ public class SharePathMap extends MapActivity {
 		// menu.add(1, MENU_BUDDIES, "Buddies").setIcon(
 		// r.getDrawable(R.drawable.about));
 
-		menu.add(0, MENU_BROWSE, R.string.browse).setIcon(
-				r.getDrawable(R.drawable.browse));
-		menu.add(0, MENU_ASK, "Ask").setIcon(r.getDrawable(R.drawable.ask));
+//		menu.add(0, MENU_BROWSE, R.string.browse).setIcon(
+//				r.getDrawable(R.drawable.browse));
+//		menu.add(0, MENU_ASK, "Ask").setIcon(r.getDrawable(R.drawable.ask));
 		menu.add(0, MENU_SEND, "Send").setIcon(r.getDrawable(R.drawable.send));
-		menu.add(0, MENU_ADDBADGE, "Add Badge").setIcon(
-				r.getDrawable(R.drawable.badge));
-		menu.add(0, MENU_ZOOM, "Zoom").setIcon(
-				r.getDrawable(R.drawable.zoom_in));
+//		menu.add(0, MENU_ADDBADGE, "Add Badge").setIcon(
+//				r.getDrawable(R.drawable.badge));
+//		menu.add(0, MENU_ZOOM, "Zoom").setIcon(
+//				r.getDrawable(R.drawable.zoom_in));
 		menu.add(0, MENU_CLEAN, "Clean").setIcon(
 				r.getDrawable(R.drawable.clean));
 		menu.add(0, MENU_SAVE, "Save").setIcon(r.getDrawable(R.drawable.save));
@@ -326,13 +326,13 @@ public class SharePathMap extends MapActivity {
 		// Log.i(LOG_TAG, "onPrepareOptionsMenu");
 		super.onPrepareOptionsMenu(menu);
 		Item itemBrowse = menu.get(MENU_BROWSE);
-		if (mv.marking) {
-			itemBrowse.setIcon(r.getDrawable(R.drawable.browse));
-			itemBrowse.setTitle(getText(R.string.browse));
-		} else {
-			itemBrowse.setIcon(r.getDrawable(R.drawable.mark));
-			itemBrowse.setTitle(getText(R.string.mark));
-		}
+//		if (mv.marking) {
+//			itemBrowse.setIcon(r.getDrawable(R.drawable.browse));
+//			itemBrowse.setTitle(getText(R.string.browse));
+//		} else {
+//			itemBrowse.setIcon(r.getDrawable(R.drawable.mark));
+//			itemBrowse.setTitle(getText(R.string.mark));
+//		}
 
 		// if(navfrom == FROM_INBOX) {
 		// menu.get(menu.findItemIndex(MENU_SEND)).setShown(true);
