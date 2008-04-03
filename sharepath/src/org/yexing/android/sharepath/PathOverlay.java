@@ -19,7 +19,7 @@ public class PathOverlay extends Overlay {
 	private static final String LOG_TAG = "SharePath";
 
 	public Path showedPath;
-	public ArrayList<KeyPoint> showedPoints;
+//	public ArrayList<KeyPoint> showedPoints;
 
 	Point center;
 	Paint p, pfont;
@@ -72,103 +72,149 @@ public class PathOverlay extends Overlay {
 	}
 
 	public void draw(Canvas canvas, PixelCalculator calculator, boolean shadow) {
-		if (mv.marking) {
-			stateLogo = (BitmapDrawable) r.getDrawable(R.drawable.mark);
-		} else {
-			stateLogo = (BitmapDrawable) r.getDrawable(R.drawable.browse);
-		}
-		canvas.drawBitmap(stateLogo.getBitmap(), mv.left + 10, mv.top + 10,
-				pfont);
 		if (start != null) {
 			canvas.drawText("From:" + start, mv.left + 60, mv.top + 25, pfont);
 			canvas.drawText("To:" + end, mv.left + 60, mv.top + 45, pfont);
 		}
-
+		int oldX = 0, oldY = 0;
+		
 		if (mv.points != null) {
-			lastlevel = mv.lastZoomLevel;
-			zoomlevel = mv.getZoomLevel();
-			Log.v(LOG_TAG, "drawpath last:" + lastlevel + " cur:" +
-					zoomlevel);
-			// Log.i("SharePath", "points count:" + mv.points.size());
-
-			// 计算地图中点的屏幕坐标，即路径中点的屏幕坐标
-			calculator.getPointXY(center, sXYCoords);
-			// Log.d("SharePath", "center x:" + center.getLatitudeE6() + "
-			// center Y:" + center.getLongitudeE6());
-			// Log.d("SharePath", "x:" + sXYCoords[0] + " Y:" + sXYCoords[1]);
-
-			// 移动路径到正确位置，以屏幕中点为基准进行平移
-			float xoffset = (sXYCoords[0]) * (float) Math.pow(2, lastlevel)
-					/ (float) Math.pow(2, zoomlevel) - mv.right / 2;
-			float yoffset = (sXYCoords[1]) * (float) Math.pow(2, lastlevel)
-					/ (float) Math.pow(2, zoomlevel) - mv.bottom / 2;
-			// Log.d("SharePath", "ox:" + xoffset + " oy:" + yoffset);
-
-			showedPath = new Path();
-			showedPoints = new ArrayList<KeyPoint>();
-
-			// 根据地图level缩放路径
-			m.setPolyToPoly(new float[] { 0, 0, 0,
-					(float) Math.pow(2, lastlevel),
-					(float) Math.pow(2, lastlevel), 0 }, 0, new float[] { 0, 0,
-					0, (float) Math.pow(2, zoomlevel),
-					(float) Math.pow(2, zoomlevel), 0 }, 0, 3);
-			// showedPath.transform(m);
-			// canvas.drawPath(showedPath, p);
-
-			// 偏移量也得转换
-			float[] dst = new float[2];
-			m.mapPoints(dst, new float[] { xoffset, yoffset });
-			int xoffset2 = (int) dst[0];
-			int yoffset2 = (int) dst[1];
-
 			for (int i = 0; i < mv.points.size(); i++) {
-				KeyPoint tt = mv.points.get(i);
-				int x = tt.p.x;
-				int y = tt.p.y;
-
-				// 转换坐标
-				dst = new float[2];
-				m.mapPoints(dst, new float[] { x, y });
-				int x2 = (int) dst[0];
-				int y2 = (int) dst[1];
-
-				KeyPoint tt2 = new KeyPoint(new android.graphics.Point(x2
-						+ xoffset2, y2 + yoffset2), tt.info);
-				showedPoints.add(tt2);
-
-				String info = tt.info;
+				calculator.getPointXY(mv.points.get(i).point, sXYCoords);
+				int x = sXYCoords[0];
+				int y = sXYCoords[1];
+//				Log.v(LOG_TAG, "PathOverLay.draw x:" + x + " y:" + y);
+				
 				if (i == 0) {
-					startLabel.setBounds(x2 - labelWidth / 2 + (int) xoffset2,
-							y2 - labelHeight / 2 + (int) yoffset2, x2
-									+ labelWidth + (int) xoffset2, y2
-									+ labelHeight + (int) yoffset2);
+					startLabel.setBounds(x - labelWidth / 2, y - labelHeight
+							/ 2, x + labelWidth / 2, y + labelHeight / 2);
 					startLabel.draw(canvas);
-					showedPath.moveTo(x2, y2);
 
 				} else if (i == mv.points.size() - 1) {
-					endLabel
-							.setBounds(x2 - labelWidth / 2 + (int) xoffset2, y2
-									- labelHeight / 2 + (int) yoffset2, x2
-									+ labelWidth + (int) xoffset2, y2
-									+ labelHeight + (int) yoffset2);
+					canvas.drawLine(oldX, oldY, x, y, pfont);
+					endLabel.setBounds(x - labelWidth / 2, y - labelHeight / 2,
+							x + labelWidth / 2, y + labelHeight / 2);
 					endLabel.draw(canvas);
-					showedPath.lineTo(x2, y2);
+					
 				} else {
-					infoLabel.setBounds(x2 - labelWidth / 2 + (int) xoffset2,
-							y2 - labelHeight / 2 + (int) yoffset2, x2
-									+ labelWidth + (int) xoffset2, y2
-									+ labelHeight + (int) yoffset2);
+					canvas.drawLine(oldX, oldY, x, y, pfont);
+					infoLabel.setBounds(x - labelWidth / 2,
+							y - labelHeight / 2, x + labelWidth / 2, y
+									+ labelHeight / 2);
 					infoLabel.draw(canvas);
-					showedPath.lineTo(x2, y2);
 				}
-				if (info != null) {
-					canvas.drawText(info, 0, info.length(), x2 + 15
-							+ (int) xoffset2, y2 - 5 + (int) yoffset2, pfont);
+				if (mv.points.get(i).info != null) {
+					canvas.drawText(mv.points.get(i).info, 0,
+							mv.points.get(i).info.length(), x + 15, y - 5,
+							pfont);
 				}
+				oldX = x;
+				oldY = y;
 			}
-			showedPath.offset(xoffset2, yoffset2);
-			canvas.drawPath(showedPath, p);
 		}
 	}
+	
+// public void draw(Canvas canvas, PixelCalculator calculator, boolean shadow) {
+//		if (mv.marking) {
+//			stateLogo = (BitmapDrawable) r.getDrawable(R.drawable.mark);
+//		} else {
+//			stateLogo = (BitmapDrawable) r.getDrawable(R.drawable.browse);
+//		}
+//		canvas.drawBitmap(stateLogo.getBitmap(), mv.left + 10, mv.top + 10,
+//				pfont);
+//		if (start != null) {
+//			canvas.drawText("From:" + start, mv.left + 60, mv.top + 25, pfont);
+//			canvas.drawText("To:" + end, mv.left + 60, mv.top + 45, pfont);
+//		}
+//
+//		if (mv.points != null) {
+//			lastlevel = mv.lastZoomLevel;
+//			zoomlevel = mv.getZoomLevel();
+//			Log.v(LOG_TAG, "drawpath last:" + lastlevel + " cur:" +
+//					zoomlevel);
+//			// Log.i("SharePath", "points count:" + mv.points.size());
+//
+//			// 计算地图中点的屏幕坐标，即路径中点的屏幕坐标
+//			calculator.getPointXY(center, sXYCoords);
+//			// Log.d("SharePath", "center x:" + center.getLatitudeE6() + "
+//			// center Y:" + center.getLongitudeE6());
+//			// Log.d("SharePath", "x:" + sXYCoords[0] + " Y:" + sXYCoords[1]);
+//
+//			// 移动路径到正确位置，以屏幕中点为基准进行平移
+//			float xoffset = (sXYCoords[0]) * (float) Math.pow(2, lastlevel)
+//					/ (float) Math.pow(2, zoomlevel) - mv.right / 2;
+//			float yoffset = (sXYCoords[1]) * (float) Math.pow(2, lastlevel)
+//					/ (float) Math.pow(2, zoomlevel) - mv.bottom / 2;
+//			// Log.d("SharePath", "ox:" + xoffset + " oy:" + yoffset);
+//
+//			showedPath = new Path();
+////			showedPoints = new ArrayList<KeyPoint>();
+//
+//			// 根据地图level缩放路径
+//			m.setPolyToPoly(new float[] { 0, 0, 0,
+//					(float) Math.pow(2, lastlevel),
+//					(float) Math.pow(2, lastlevel), 0 }, 0, new float[] { 0, 0,
+//					0, (float) Math.pow(2, zoomlevel),
+//					(float) Math.pow(2, zoomlevel), 0 }, 0, 3);
+//			// showedPath.transform(m);
+//			// canvas.drawPath(showedPath, p);
+//
+//			// 偏移量也得转换
+//			float[] dst = new float[2];
+//			m.mapPoints(dst, new float[] { xoffset, yoffset });
+//			int xoffset2 = (int) dst[0];
+//			int yoffset2 = (int) dst[1];
+//
+//			for (int i = 0; i < mv.points.size(); i++) {
+//				KeyPoint tt = mv.points.get(i);
+//				int x = tt.p.x;
+//				int y = tt.p.y;
+//
+//				// 转换坐标
+//				dst = new float[2];
+//				m.mapPoints(dst, new float[] { x, y });
+//				int x2 = (int) dst[0];
+//				int y2 = (int) dst[1];
+//
+//				KeyPoint tt2 = new KeyPoint(new android.graphics.Point(x2
+//						+ xoffset2, y2 + yoffset2), tt.info);
+////				showedPoints.add(tt2);
+//				
+//				tt.p.x = x2;
+//				tt.p.y = y2;
+//
+//				String info = tt.info;
+//				if (i == 0) {
+//					startLabel.setBounds(x2 - labelWidth / 2 + (int) xoffset2,
+//							y2 - labelHeight / 2 + (int) yoffset2, x2
+//									+ labelWidth + (int) xoffset2, y2
+//									+ labelHeight + (int) yoffset2);
+//					startLabel.draw(canvas);
+//					showedPath.moveTo(x2, y2);
+//
+//				} else if (i == mv.points.size() - 1) {
+//					endLabel
+//							.setBounds(x2 - labelWidth / 2 + (int) xoffset2, y2
+//									- labelHeight / 2 + (int) yoffset2, x2
+//									+ labelWidth + (int) xoffset2, y2
+//									+ labelHeight + (int) yoffset2);
+//					endLabel.draw(canvas);
+//					showedPath.lineTo(x2, y2);
+//				} else {
+//					infoLabel.setBounds(x2 - labelWidth / 2 + (int) xoffset2,
+//							y2 - labelHeight / 2 + (int) yoffset2, x2
+//									+ labelWidth + (int) xoffset2, y2
+//									+ labelHeight + (int) yoffset2);
+//					infoLabel.draw(canvas);
+//					showedPath.lineTo(x2, y2);
+//				}
+//				if (info != null) {
+//					canvas.drawText(info, 0, info.length(), x2 + 15
+//							+ (int) xoffset2, y2 - 5 + (int) yoffset2, pfont);
+//				}
+//			}
+//			showedPath.offset(xoffset2, yoffset2);
+//			canvas.drawPath(showedPath, p);
+//		}
+//	}
 }

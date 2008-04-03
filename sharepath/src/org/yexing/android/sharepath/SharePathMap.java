@@ -172,7 +172,7 @@ public class SharePathMap extends MapActivity {
 				for (int i = 0; i < temp.length; i++) {
 					temp2 = temp[i].split(INNER_SEPARATER);
 					// Log.v(LOG_TAG, "temp2 " + temp2.length);
-					KeyPoint tt = new KeyPoint(new android.graphics.Point(
+					KeyPoint tt = new KeyPoint(new Point(
 							Integer.parseInt(temp2[0]), Integer
 									.parseInt(temp2[1])),
 							(temp2.length == 3 ? temp2[2] : ""));
@@ -404,7 +404,7 @@ public class SharePathMap extends MapActivity {
 
 	public void mark() {
 		if (mv.marking == false) {
-			mv.points = po.showedPoints;
+//			mv.points = po.showedPoints;
 			po.lastlevel = mv.getZoomLevel();
 			po.center = mv.getMapCenter();
 			mv.marking = true;
@@ -477,9 +477,9 @@ public class SharePathMap extends MapActivity {
 
 					KeyPoint tt;
 					String path = "";
-					for (int i = 0; i < po.showedPoints.size(); i++) {
-						tt = po.showedPoints.get(i);
-						path += "" + tt.p.x + INNER_SEPARATER + tt.p.y
+					for (int i = 0; i < mv.points.size(); i++) {
+						tt = mv.points.get(i);
+						path += "" + tt.point.getLatitudeE6() + INNER_SEPARATER + tt.point.getLongitudeE6()
 								+ INNER_SEPARATER
 								+ (tt.info == null ? "" : tt.info)
 								+ POINT_SEPARATER;
@@ -644,9 +644,9 @@ public class SharePathMap extends MapActivity {
 
 		KeyPoint tt;
 		String path = "";
-		for (int i = 0; i < po.showedPoints.size(); i++) {
-			tt = po.showedPoints.get(i);
-			path += "" + tt.p.x + INNER_SEPARATER + tt.p.y + INNER_SEPARATER
+		for (int i = 0; i < mv.points.size(); i++) {
+			tt = mv.points.get(i);
+			path += "" + tt.point.getLatitudeE6() + INNER_SEPARATER + tt.point.getLongitudeE6() + INNER_SEPARATER
 					+ (tt.info == null ? "" : tt.info) + POINT_SEPARATER;
 		}
 		intent.putExtra(Domain.Message.PATH, path);

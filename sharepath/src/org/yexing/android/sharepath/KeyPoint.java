@@ -1,9 +1,10 @@
 package org.yexing.android.sharepath;
 
-import android.graphics.Point;
+import com.google.android.maps.Point;
+
 
 class KeyPoint {
-	Point p;
+	Point point;
 	String info;
 
 	KeyPoint() {
@@ -11,7 +12,7 @@ class KeyPoint {
 	}
 	
 	KeyPoint(Point p, String info) {
-		this.p = p;
+		this.point = p;
 		this.info = info;
 	}
 }
