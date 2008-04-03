@@ -66,15 +66,18 @@ public class PathOverlay extends Overlay {
 		p.setARGB(255, 255, 80, 80);
 		p.setPathEffect(new CornerPathEffect(4));
 		// ÎÄ×ÖÑùÊ½
-		pfont = new Paint(Paint.UNDERLINE_TEXT_FLAG);
+		pfont = new Paint(Paint.ANTI_ALIAS_FLAG);
 		pfont.setTextSize(16);
-		pfont.setXfermode(new Xfermode());
+//		pfont.setXfermode(new Xfermode());
+		p.setStrokeWidth(2);
+		p.setStrokeCap(Paint.Cap.BUTT);
+		pfont.setStyle(Paint.Style.FILL_AND_STROKE);
 	}
 
 	public void draw(Canvas canvas, PixelCalculator calculator, boolean shadow) {
 		if (start != null) {
-			canvas.drawText("From:" + start, mv.left + 60, mv.top + 25, pfont);
-			canvas.drawText("To:" + end, mv.left + 60, mv.top + 45, pfont);
+			canvas.drawText("From:" + start, mv.left + 10, mv.top + 25, pfont);
+			canvas.drawText("To:" + end, mv.left + 10, mv.top + 45, pfont);
 		}
 		int oldX = 0, oldY = 0;
 		

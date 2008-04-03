@@ -1,3 +1,12 @@
+0.9.1
+  user options change a lot.
+  1. move at the adge of screen. move down to zoom out, move up
+     to zoom in.
+  2. no longer need to switch between marking state and browsing
+     state.
+  3. double click to remove last mark.
+  4. hold on a mark to add badge.
+
 0.9
   1. improved the notifiction. The notifiction could turn to the
      right state, when bootup completed, new message comes up or 

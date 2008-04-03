@@ -43,12 +43,12 @@ public class MarkableMapView extends MapView {
 	
 	//可能需要通过context取回po，比如在onlayout中，暂时保留
 //	PathOverlay po;
-	Context context;
+	SharePathMap context;
 
 
 	public ArrayList<KeyPoint> points;//路径上的转折点
-
 	Dialog badgeDialog; //用来输入提示信息的对话框
+	int pindex; // 当前点的index
 	
 	int lastZoomLevel;
 	
@@ -57,7 +57,7 @@ public class MarkableMapView extends MapView {
 
 		Log.v(LOG_TAG, "MarkableMapView");
 		
-		this.context = context;
+		this.context = (SharePathMap)context;
 		
 		//路径样式
 		cpe = new CornerPathEffect(4);
@@ -104,7 +104,10 @@ public class MarkableMapView extends MapView {
 			int y = (int) ev.getY();
 //			Log.v(LOG_TAG, "action:" + action + " x:" + x + " y:" + y);
 			
-			
+			latspan = getLatitudeSpan();
+			lonspan = getLongitudeSpan();
+//			Log.v(LOG_TAG, "lat:" + latspan + " lon:" + lonspan);
+
 			if(action == MotionEvent.ACTION_DOWN) {
 				oldX = x;
 				oldY = y;
@@ -116,11 +119,7 @@ public class MarkableMapView extends MapView {
 					bBorder = true;
 				} else {
 					bBorder = false;
-				}
-								
-				latspan = getLatitudeSpan();
-				lonspan = getLongitudeSpan();
-				Log.v(LOG_TAG, "lat:" + latspan + " lon:" + lonspan);
+				}								
 			}
 			if(action == MotionEvent.ACTION_MOVE) {
 				bMoved = true;
@@ -143,8 +142,7 @@ public class MarkableMapView extends MapView {
 			}
 			
 			if (action == MotionEvent.ACTION_UP) {
-				Log.d(LOG_TAG, "UP x:" + x + " y:" + y
-						+ " R:"	+ right + " B:" + bottom);
+//				Log.d(LOG_TAG, "UP x:" + x + " y:" + y + " R:"	+ right + " B:" + bottom);
 				if(bBorder && bMoved) {
 					lastZoomLevel = getZoomLevel();
 					
@@ -171,9 +169,15 @@ public class MarkableMapView extends MapView {
 							
 						}
 					} else { // 长按 在已有点上 添加badge 否则send,save,clean
-						
+						pindex = getNearbyPoint(screenToGeo(x, y));
+						Log.v(LOG_TAG, "point:" + pindex);
+						if(pindex >-1) {
+							setBadge();
+						} else {
+							
+						}
 					}
-					Log.v(LOG_TAG, "event:" + ev.getEventTime() + " last:" + lastClick);
+//					Log.v(LOG_TAG, "event:" + ev.getEventTime() + " last:" + lastClick);
 				}
 				invalidate();
 				lastClick = ev.getEventTime();
@@ -197,7 +201,7 @@ public class MarkableMapView extends MapView {
 			public void onClick(final View v) {
 				EditText et = (EditText) badgeDialog.findViewById(R.id.tooltip);
 				//Log.d("SharePath", "et " + (et == null ? "error" : "ok"));
-				KeyPoint tt = points.get(points.size() - 1);
+				KeyPoint tt = points.get(pindex==-1?points.size()-1:pindex);
 				//Log.d("SharePath", "tt " + (tt == null ? "error" : "ok"));
 				tt.info = new String(et.getText().toString());
 				//Log.d("SharePath", "text " + tt.info);
@@ -219,8 +223,6 @@ public class MarkableMapView extends MapView {
 	}
 	
 	public Point screenToGeo(int x, int y) {
-		int latspan = getLatitudeSpan();
-		int lonspan = getLongitudeSpan();
 		
 		int deltaX = lonspan / right * (x - right/2);
 		int deltaY = latspan / bottom * (y - bottom/2);
@@ -230,6 +232,22 @@ public class MarkableMapView extends MapView {
 				this.getMapCenter().getLongitudeE6() + deltaX);
 		
 		return geoPoint;
+	}
+	
+	public int getNearbyPoint(Point p) {
+		int deltaLat = latspan / bottom * 10;
+		int deltaLon = lonspan / right * 10;
+		int lat = p.getLatitudeE6();
+		int lon = p.getLongitudeE6();
+		for(int i=0; i<points.size(); i++) {
+			int curlat = points.get(i).point.getLatitudeE6();
+			int curlon = points.get(i).point.getLongitudeE6();
+			if(curlat>lat-deltaLat && curlat<lat+deltaLat
+					&& curlon > lon - deltaLon && curlon < lon + deltaLon)
+				return i;
+		}
+		return -1;
+		
 	}
 	
 }
