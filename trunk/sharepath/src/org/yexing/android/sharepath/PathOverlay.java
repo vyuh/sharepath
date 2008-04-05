@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.maps.Overlay;
@@ -37,11 +38,14 @@ public class PathOverlay extends Overlay {
 	BitmapDrawable infoLabel;
 	BitmapDrawable endLabel;
 
+	Location l;
+	BitmapDrawable myLocationLabel;
+
 	BitmapDrawable stateLogo = null;
 	String start, end;
 
 	public PathOverlay(Resources r, MarkableMapView mv, int screenWidth,
-			int screenHeight) {
+			int screenHeight, Location l) {
 
 		Log.v(LOG_TAG, "PathOverlay");
 		
@@ -52,12 +56,15 @@ public class PathOverlay extends Overlay {
 		startLabel = (BitmapDrawable) r.getDrawable(R.drawable.greenstar);
 		infoLabel = (BitmapDrawable) r.getDrawable(R.drawable.yellowstar);
 		endLabel = (BitmapDrawable) r.getDrawable(R.drawable.redstar);
+		myLocationLabel = (BitmapDrawable) r.getDrawable(R.drawable.icon_star);
 		labelWidth = 10; // startLabel.getIntrinsicWidth();
 		labelHeight = 10; // startLabel.getIntrinsicHeight();
 
 		this.center = mv.getMapCenter();
 		this.zoomlevel = mv.getZoomLevel();
 		this.lastlevel = zoomlevel;
+		
+		this.l = l;
 
 		// 路径的样式
 		p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -79,13 +86,13 @@ public class PathOverlay extends Overlay {
 			canvas.drawText("From:" + start, mv.left + 10, mv.top + 25, pfont);
 			canvas.drawText("To:" + end, mv.left + 10, mv.top + 45, pfont);
 		}
-		int oldX = 0, oldY = 0;
+		int oldX = 0, oldY = 0, x, y;
 		
 		if (mv.points != null) {
 			for (int i = 0; i < mv.points.size(); i++) {
 				calculator.getPointXY(mv.points.get(i).point, sXYCoords);
-				int x = sXYCoords[0];
-				int y = sXYCoords[1];
+				x = sXYCoords[0];
+				y = sXYCoords[1];
 //				Log.v(LOG_TAG, "PathOverLay.draw x:" + x + " y:" + y);
 				
 				if (i == 0) {
@@ -115,6 +122,15 @@ public class PathOverlay extends Overlay {
 				oldY = y;
 			}
 		}
+		// draw my location
+		calculator.getPointXY(new Point((int)(l.getLatitude() * 1e6),
+				(int)(l.getLongitude() * 1e6)), sXYCoords);
+		x = sXYCoords[0];
+		y = sXYCoords[1];
+		myLocationLabel.setBounds(x - labelWidth / 2, y - labelHeight / 2,
+				x + labelWidth / 2, y + labelHeight / 2);
+		myLocationLabel.draw(canvas);
+		
 	}
 	
 // public void draw(Canvas canvas, PixelCalculator calculator, boolean shadow) {

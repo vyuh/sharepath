@@ -1,6 +1,10 @@
+0.9.2
+  1. add my location to the map.
+  2. user can rotate the map by move at the top or bottom edge
+     of the map. but this function is not completed.
 0.9.1
-  user options change a lot.
-  1. move at the adge of screen. move down to zoom out, move up
+  user options changed a lot.
+  1. move at the edge of screen. move down to zoom out, move up
      to zoom in.
   2. no longer need to switch between marking state and browsing
      state.
@@ -8,11 +12,11 @@
   4. hold on a mark to add badge.
 
 0.9
-  1. improved the notifiction. The notifiction could turn to the
-     right state, when bootup completed, new message comes up or 
-     messge is read; When click on the notifiction icon, it can 
+  1. improved the notification. The notification could turn to the
+     right state, when boot up completed, new message comes up or 
+     message is read; When click on the notification icon, it can 
      link to the right activity.
 
 0.8
-  1. Make buddy list multiple selectedable.
+  1. Make buddy list multiple selected.
   2. And an icon to inbox list to sign out read or not.

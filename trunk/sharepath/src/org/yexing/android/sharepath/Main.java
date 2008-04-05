@@ -122,9 +122,9 @@ public class Main extends ListActivity {
 		        convertView = inflate.inflate(R.layout.main_list, null, null);
 		        TextView tv = (TextView)convertView.findViewById(R.id.text1);
 		        tv.setText((String)list.get(position).get("title"));
-		        ImageView iv = (ImageView)convertView.findViewById(R.id.image);
+//		        ImageView iv = (ImageView)convertView.findViewById(R.id.image);
 //		        iv.setImageResource(R.drawable.badge);
-		        Uri uri = Uri.parse("http://www.yexing.org/image.axd?picture=browse.png");
+//		        Uri uri = Uri.parse("http://www.yexing.org/image.axd?picture=browse.png");
 		        
 //		        iv.setImageURI(uri);
 //		        Drawable drawable = Drawable.createFromPath(uri.getPath());

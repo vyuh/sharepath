@@ -6,6 +6,7 @@ import java.util.Map;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -67,7 +68,9 @@ public class MarkableMapView extends MapView {
 		p.setPathEffect(cpe);
 
 		points = new ArrayList<KeyPoint>();
-
+//		if(!isEdgeZooming())
+//			toggleEdgeZooming();
+//			toggleShowMyLocation();
 	}
 
 	// @Override
@@ -83,9 +86,21 @@ public class MarkableMapView extends MapView {
 				+ " right:" + right + " bottom:" + bottom);
 	}
 	
-//	boolean bZoom = false;
+	
+	float degrees = 0;
+	@Override
+	protected void onDraw(Canvas canvas) {
+		// TODO Auto-generated method stub
+		canvas.rotate(degrees,right/2, bottom/2);
+		super.onDraw(canvas);
+	}
+
+
+
+	//	boolean bZoom = false;
 	boolean bMoved = false; //用户是否采取了移动操作
-	boolean bBorder = false; //action的位置是否在屏幕左右两侧边缘（目前不需要上下边缘）
+	boolean bBorderLR = false; //action的位置是否在屏幕左右两侧边缘
+	boolean bBorderTB = false; //action的位置是否在屏幕上下边缘
 	int borderSize = 20; //定义边缘的宽度，宽度以内的即属于屏幕边缘
 	int oldX, oldY; //记录down操作发生时的位置，以便在up操作发生时进行比较
 	Point pCenter; //down操作发生时的地图中点
@@ -95,7 +110,6 @@ public class MarkableMapView extends MapView {
 	long lastClick = 0; //上次点击的时间
 	long clickDurence = 300; //两次点击间隔的时间(ms)，小于这个时间视为双击
 	
-	boolean bNormalMove = false; //普通的拖动地图操作不做处理
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		
@@ -116,24 +130,29 @@ public class MarkableMapView extends MapView {
 				
 				//检测是否点击在边缘
 				if(right - x < borderSize || x < borderSize) {
-					bBorder = true;
+					bBorderLR = true;
 				} else {
-					bBorder = false;
+					bBorderLR = false;
+				}								
+				if(bottom - y < borderSize || y < borderSize) {
+					bBorderTB = true;
+				} else {
+					bBorderTB = false;
 				}								
 			}
 			if(action == MotionEvent.ACTION_MOVE) {
 				bMoved = true;
 				
 				if(right - x > borderSize && x > borderSize) {
-					bBorder = false;
-					bNormalMove = true;
+					bBorderLR = false;
 				}
-				if(!bBorder) {
-					Log.v(LOG_TAG, "out of border");
-					
+				if(bottom - y > borderSize && y > borderSize) {
+					bBorderTB = false;
+				}
+				if(!bBorderLR) {
 					int deltaX = lonspan / right * (x - oldX);
 					int deltaY = latspan / bottom * (y - oldY);
-					Log.v(LOG_TAG, "dx:" + deltaX + " dy:" + deltaY);
+//					Log.v(LOG_TAG, "dx:" + deltaX + " dy:" + deltaY);
 					
 					getController().animateTo(new Point(pCenter.getLatitudeE6() + deltaY,
 							pCenter.getLongitudeE6() - deltaX));//, true);
@@ -143,17 +162,22 @@ public class MarkableMapView extends MapView {
 			
 			if (action == MotionEvent.ACTION_UP) {
 //				Log.d(LOG_TAG, "UP x:" + x + " y:" + y + " R:"	+ right + " B:" + bottom);
-				if(bBorder && bMoved) {
+				if(bBorderLR && bMoved) {
 					lastZoomLevel = getZoomLevel();
 					
-					if(oldY > y) {
+//					if(oldY > y) {
 						getController().zoomTo(getZoomLevel()
 								- (oldY - y)/borderSize);
-					} else {
-						getController().zoomTo(getZoomLevel()
-								+ (y - oldY)/borderSize);						
-					}
+//					} 
 					
+					// 暂时不再作其他处理了
+//					else {
+//						getController().zoomTo(getZoomLevel()
+//								+ (y - oldY)/borderSize);						
+//					}
+					
+				} else if(bBorderTB && bMoved) {
+					degrees += 10 * (x - oldX)/borderSize;
 				} else if(!bMoved) {
 					if(ev.getEventTime() - ev.getDownTime() < clickDurence) { // 点击 非长按
 						if(ev.getEventTime() - lastClick > clickDurence) { // 单击
