@@ -107,6 +107,12 @@ public class SharePathMap extends MapActivity {
 
 		r = getResources();
 
+		// 得到当前位置的gps坐标
+		lm = (LocationManager) this
+				.getSystemService(Context.LOCATION_SERVICE);
+		l = lm.getCurrentLocation("gps");
+		// List list = lm.getProviders();
+
 		// 检查启动参数
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -186,13 +192,6 @@ public class SharePathMap extends MapActivity {
 			startService(new Intent(SharePathMap.this,
 					SharePathService.class), bundle);
 		} else {
-
-			// 得到当前位置的gps坐标
-			lm = (LocationManager) this
-					.getSystemService(Context.LOCATION_SERVICE);
-			l = lm.getCurrentLocation("gps");
-			// List list = lm.getProviders();
-
 			// 重新定位地图到当前位置
 			mc.centerMapTo(new Point((int) (l.getLatitude() * 1e6), (int) (l
 					.getLongitude() * 1e6)), true);
@@ -200,7 +199,7 @@ public class SharePathMap extends MapActivity {
 		}
 
 		mv.lastZoomLevel = mv.getZoomLevel();
-		po = new PathOverlay(r, mv, screenWidth, screenHeight);
+		po = new PathOverlay(r, mv, screenWidth, screenHeight, l);
 		if (navfrom != 0) {
 			po.start = start;
 			po.end = end;
