@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewInflate;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -58,6 +59,9 @@ public class Main extends ListActivity {
 		addItem(list, index++ + ". My Maps", activityIntent(
 				"org.yexing.android.sharepath",
 				"org.yexing.android.sharepath.MyMaps"));
+		addItem(list, index++ + ". Find Maps on Web", activityIntent(
+				"org.yexing.android.sharepath",
+				"org.yexing.android.sharepath.WebMaps"));
 		addItem(list, index++ + ". My Buddies", activityIntent(
 				"org.yexing.android.sharepath",
 				"org.yexing.android.sharepath.Buddy"));
@@ -73,6 +77,16 @@ public class Main extends ListActivity {
 //			public void onClick(View v) {
 //				Intent intent = new Intent(Intent.BOOT_COMPLETED_ACTION);
 //				broadcastIntent(intent);
+//			}
+//		});
+
+		// 
+//		Button btnTest = (Button) findViewById(R.id.test);
+//		btnTest.setOnClickListener(new View.OnClickListener() {
+//
+//			public void onClick(View v) {
+//				WebHelper wh = new WebHelper();
+//				wh.Request("http://10.0.2.2:8180/sharepath/index.jsp?action=search");
 //			}
 //		});
 	}

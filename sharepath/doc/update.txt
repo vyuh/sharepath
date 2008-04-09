@@ -1,8 +1,15 @@
-0.9.2
+0.9.3  2008-4-10
+  new function: upload map to web site(use menu item "share").
+  find map from web.
+  notice: need to access http://demo.yexing.org/sharepath.jsp.
+  time out:20000ms.
+  
+0.9.2  2008-4-5
   1. add my location to the map.
   2. user can rotate the map by move at the top or bottom edge
      of the map. but this function is not completed. I wish i
      can simulate the phone as a compass.
+     
 0.9.1
   user options changed a lot.
   1. move at the edge of screen. move down to zoom out, move up

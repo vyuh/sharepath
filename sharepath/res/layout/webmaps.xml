@@ -13,6 +13,6 @@
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent"
         android:textSize="12pt"
-        android:text="@string/nothing"/>
+        android:text="@string/use_menu_to_search"/>
         
 </FrameLayout>
