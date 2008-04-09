@@ -53,11 +53,14 @@ public class SharePathMap extends MapActivity {
 	public static final int MENU_EDIT = MENU_ADD + 1;
 	public static final int MENU_DELETE = MENU_EDIT + 1;
 	public static final int MENU_DELETE_ALL = MENU_DELETE + 1;
+	public static final int MENU_SEARCH = MENU_DELETE_ALL + 1;
+	public static final int MENU_REFRESH = MENU_SEARCH + 1;
 
 	// 从哪个界面转到map界面的
 	public static final int FROM_MAIN = 0;
 	public static final int FROM_MYMAPS = FROM_MAIN + 1;
 	public static final int FROM_INBOX = FROM_MYMAPS + 1;
+	public static final int FROM_WEBMAPS = FROM_INBOX + 1;
 
 	static Resources r;
 
@@ -95,6 +98,7 @@ public class SharePathMap extends MapActivity {
 	private static final int MENU_INBOX = MENU_ASK + 1;
 	private static final int MENU_MYMAPS = MENU_INBOX + 1;
 	private static final int MENU_BUDDIES = MENU_MYMAPS + 1;
+	private static final int MENU_SHARE = MENU_BUDDIES + 1;
 
 	public static final String POINT_SEPARATER = "_point_";
 	public static final String INNER_SEPARATER = "_inner_";
@@ -156,9 +160,9 @@ public class SharePathMap extends MapActivity {
 			mCursor.first();
 
 			// 设置中点坐标
-			
-			String[] temp = mCursor.getString(mCursor.getColumnIndex(Domain.Message.CENTER))
-					.split(INNER_SEPARATER);
+			String center = mCursor.getString(mCursor.getColumnIndex(Domain.Message.CENTER));
+			Log.v(LOG_TAG, center);
+			String[] temp = center.split(INNER_SEPARATER);
 			mc.centerMapTo(new Point(Integer.parseInt(temp[0]), Integer
 					.parseInt(temp[1])), true);
 			// 缩放
@@ -191,7 +195,39 @@ public class SharePathMap extends MapActivity {
 			bundle.putInt("action", SharePathService.ACTION_READ_MESSAGE);
 			startService(new Intent(SharePathMap.this,
 					SharePathService.class), bundle);
-		} else {
+		} else if(navfrom == FROM_WEBMAPS) {
+			// 设置中点坐标
+			String center = extras.getString(Domain.Message.CENTER);
+			Log.v(LOG_TAG, center);
+			String[] temp = center.split(INNER_SEPARATER);
+			mc.centerMapTo(new Point(Integer.parseInt(temp[0]), Integer
+					.parseInt(temp[1])), true);
+			// 缩放
+			mc.zoomTo(Integer.parseInt(extras.getString(Domain.Message.LEVEL)));
+
+			// 路径信息
+			String[] temp2;
+			String path = extras.getString(Domain.Message.PATH); 
+			if (path != null && !"".equals(path)) {
+				temp = path.split(
+						POINT_SEPARATER);
+				mv.points.clear();
+
+				// Log.v(LOG_TAG, "temp " + temp.length);
+				Log.v(LOG_TAG, "path " + path);
+
+				for (int i = 0; i < temp.length; i++) {
+					temp2 = temp[i].split(INNER_SEPARATER);
+					// Log.v(LOG_TAG, "temp2 " + temp2.length);
+					KeyPoint tt = new KeyPoint(new Point(
+							Integer.parseInt(temp2[0]), Integer
+									.parseInt(temp2[1])),
+							(temp2.length == 3 ? temp2[2] : ""));
+					mv.points.add(tt);
+				}
+			}
+			
+		}else {
 			// 重新定位地图到当前位置
 			mc.centerMapTo(new Point((int) (l.getLatitude() * 1e6), (int) (l
 					.getLongitude() * 1e6)), true);
@@ -311,6 +347,7 @@ public class SharePathMap extends MapActivity {
 		menu.add(0, MENU_CLEAN, "Clean").setIcon(
 				r.getDrawable(R.drawable.clean));
 		menu.add(0, MENU_SAVE, "Save").setIcon(r.getDrawable(R.drawable.save));
+		menu.add(0, MENU_SHARE, "Share").setIcon(r.getDrawable(R.drawable.browse));
 		menu.add(0, MENU_LAYERS, "Layers").setIcon(
 				r.getDrawable(R.drawable.layers));
 
@@ -387,6 +424,9 @@ public class SharePathMap extends MapActivity {
 			break;
 		case MENU_BUDDIES:
 			buddies();
+			break;
+		case MENU_SHARE:
+			share();
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -566,6 +606,84 @@ public class SharePathMap extends MapActivity {
 	public void buddies() {
 		startSubActivity(new Intent(this,
 				org.yexing.android.sharepath.Buddy.class), CODE_BUDDIES);
+	}
+
+	public void share() {
+		if(navfrom == FROM_WEBMAPS)
+			return;
+		
+		if (mv.points.size() > 0) {// 已经开始标图，有路径信息可以保存
+
+			// show a dialog to input start place and end place
+			savePathDialog = new Dialog(this);
+
+			savePathDialog.setContentView(R.layout.save_path_dialog);
+			savePathDialog.setTitle("Save");
+
+			// Log.d(LOG_TAG, "mDialog " + (mDialog == null ? "error" :
+			// "ok"));
+
+			EditText etStart = (EditText) savePathDialog
+					.findViewById(R.id.start);
+			EditText etEnd = (EditText) savePathDialog.findViewById(R.id.end);
+			if (navfrom != 0) {
+				etStart.setText(start);
+				etEnd.setText(end);
+			}
+
+			Button bOk = (Button) savePathDialog.findViewById(R.id.pathinfo_ok);
+			bOk.setOnClickListener(new OnClickListener() {
+				public void onClick(final View v) {
+					String url = getString(R.string.url) 
+						+ "?action=publish&from=sharepath&date=0";
+					EditText etStart = (EditText) savePathDialog
+							.findViewById(R.id.start);
+					EditText etEnd = (EditText) savePathDialog
+							.findViewById(R.id.end);
+
+					url += "&start=" + etStart.getText()
+						+ "&end=" + etEnd.getText();
+					
+					KeyPoint tt;
+					String path = "";
+					for (int i = 0; i < mv.points.size(); i++) {
+						tt = mv.points.get(i);
+						path += "" + tt.point.getLatitudeE6() + INNER_SEPARATER + tt.point.getLongitudeE6()
+								+ INNER_SEPARATER
+								+ (tt.info == null ? "" : tt.info)
+								+ POINT_SEPARATER;
+					}
+					
+					url += "&path=" + path;
+
+					url += "&level=" + mv.getZoomLevel();
+
+					url += "&center=" + mv.getMapCenter().getLatitudeE6()
+						+ INNER_SEPARATER + mv.getMapCenter().getLongitudeE6();
+					
+					WebHelper wh = new WebHelper();
+					if(wh.Request(url) == false) {
+						showAlert("Error", R.drawable.about, "Connect time out!", "OK", true);
+					} else {
+						showAlert("Information", R.drawable.about, "Map uploaded!", "OK", true);					
+					}
+					
+					savePathDialog.dismiss();
+				}
+			});
+
+			Button bCancel = (Button) savePathDialog
+					.findViewById(R.id.pathinfo_cancel);
+			bCancel.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					savePathDialog.cancel();
+				}
+			});
+
+			savePathDialog.show();
+		} else {
+			showAlert(null, R.drawable.about, "Nothing can be shared!", "OK", true);
+		}
 	}
 
 	// gtalk 相关

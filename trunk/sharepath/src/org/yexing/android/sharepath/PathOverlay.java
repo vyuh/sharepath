@@ -56,9 +56,9 @@ public class PathOverlay extends Overlay {
 		startLabel = (BitmapDrawable) r.getDrawable(R.drawable.greenstar);
 		infoLabel = (BitmapDrawable) r.getDrawable(R.drawable.yellowstar);
 		endLabel = (BitmapDrawable) r.getDrawable(R.drawable.redstar);
-		myLocationLabel = (BitmapDrawable) r.getDrawable(R.drawable.icon_star);
-		labelWidth = 10; // startLabel.getIntrinsicWidth();
-		labelHeight = 10; // startLabel.getIntrinsicHeight();
+		myLocationLabel = (BitmapDrawable) r.getDrawable(R.drawable.star);
+		labelWidth = 16; // startLabel.getIntrinsicWidth();
+		labelHeight = 16; // startLabel.getIntrinsicHeight();
 
 		this.center = mv.getMapCenter();
 		this.zoomlevel = mv.getZoomLevel();

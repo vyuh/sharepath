@@ -45,6 +45,7 @@
             </intent-filter>
 		</activity>
 		<activity android:name="MyMaps" android:label="@string/mymaps" />
+		<activity android:name="WebMaps" android:label="@string/webmaps" />
 		<activity android:name="Buddy" android:label="@string/buddy" />
 		<activity android:name="ChooseBuddy" android:label="@string/buddy"
 			android:theme="@android:style/Theme.Dialog" />

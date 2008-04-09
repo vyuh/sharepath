@@ -12,10 +12,12 @@
     <string name="outbox">outbox</string>
     <string name="sent">Sent</string>
     <string name="mymaps">My Maps</string>
+    <string name="webmaps">Find Maps on Web</string>
     <string name="buddy">Buddy</string>
     
     <string name="nobody">Nobody</string>
     <string name="nothing">Nothing</string>
+    <string name="use_menu_to_search">Please use menu to search!</string>
     
     <string name="sharepath_service">SharePath Service</string>
     <string name="sharepath_service_started">SharePath Service Started!</string>
@@ -38,5 +40,9 @@
     <string name="reply">Reply</string>
     <string name="delete">Delete</string>
     <string name="delete_all">Delete All</string>
+    <string name="search">Search</string>
+    <string name="refresh">refresh</string>
+    
+    <string name="url">http://demo.yexing.org:8080/sharepath.jsp</string>
     
 </resources>
