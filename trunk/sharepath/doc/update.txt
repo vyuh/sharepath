@@ -1,3 +1,6 @@
+0.9.4
+  add a dialog to input searck keyword
+  
 0.9.3  2008-4-10
   new function: upload map to web site(use menu item "share").
   find map from web.

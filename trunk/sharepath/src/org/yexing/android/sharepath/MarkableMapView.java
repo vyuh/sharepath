@@ -109,6 +109,7 @@ public class MarkableMapView extends MapView {
 	
 	long lastClick = 0; //上次点击的时间
 	long clickDurence = 300; //两次点击间隔的时间(ms)，小于这个时间视为双击
+	long longPress = 180;
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
@@ -179,7 +180,7 @@ public class MarkableMapView extends MapView {
 				} else if(bBorderTB && bMoved) {
 					degrees += 10 * (x - oldX)/borderSize;
 				} else if(!bMoved) {
-					if(ev.getEventTime() - ev.getDownTime() < clickDurence) { // 点击 非长按
+					if(ev.getEventTime() - ev.getDownTime() < longPress) { // 点击 非长按
 						if(ev.getEventTime() - lastClick > clickDurence) { // 单击
 							KeyPoint tt = new KeyPoint(screenToGeo(x, y), null);
 							points.add(tt);	
@@ -212,6 +213,18 @@ public class MarkableMapView extends MapView {
 
 	
 	
+//	@Override
+//	public boolean onLongPress(float x, float y) {
+//		// TODO Auto-generated method stub
+//		pindex = getNearbyPoint(screenToGeo((int)x, (int)y));
+//		if(pindex >-1) {
+//			setBadge();
+//		} else {
+//			
+//		}
+//		return true; //super.onLongPress(x, y);
+//	}
+
 	/**
 	 * 设置工具提示
 	 */
@@ -259,8 +272,8 @@ public class MarkableMapView extends MapView {
 	}
 	
 	public int getNearbyPoint(Point p) {
-		int deltaLat = latspan / bottom * 10;
-		int deltaLon = lonspan / right * 10;
+		int deltaLat = latspan / bottom * 15;
+		int deltaLon = lonspan / right * 15;
 		int lat = p.getLatitudeE6();
 		int lon = p.getLongitudeE6();
 		for(int i=0; i<points.size(); i++) {
