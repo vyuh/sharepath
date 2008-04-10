@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SharePath v0.9.1</string>
+    <string name="app_name">SharePath v0.9.5</string>
     <string name="error">Error</string>
     <string name="error_no_selection">Must select a boddy!</string>
     <string name="button_ok">OK</string>

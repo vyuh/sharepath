@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewInflate;
 import android.view.Menu.Item;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -32,6 +35,8 @@ public class WebMaps extends ListActivity {
 
 	List<Map> list;
 	ImageSimpleAdapter isa;
+	Dialog searchDialog;
+
 	
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -124,17 +129,44 @@ public class WebMaps extends ListActivity {
 		super.onOptionsItemSelected(item);
 		switch (item.getId()) {
 		case SharePathMap.MENU_SEARCH:
-			WebHelper wh = new WebHelper();
-			if(wh.Request(getString(R.string.url) + "?action=search",
-					list) == false) {
-				this.showAlert("Error", R.drawable.about, "Connect time out!", "OK", true);
-			} else {
-				if(list.size()>0) {
-					isa.notifyDataSetChanged();
-				} else {
-					this.showAlert("Information", R.drawable.about, "Here is no map available!", "OK", true);					
+			searchDialog = new Dialog(this);
+
+			searchDialog.setContentView(R.layout.search_dialog);
+			searchDialog.setTitle("Search");
+
+			// Log.d(LOG_TAG, "mDialog " + (mDialog == null ? "error" :
+			// "ok"));
+
+			Button bOk = (Button) searchDialog.findViewById(R.id.ok);
+			bOk.setOnClickListener(new OnClickListener() {
+				public void onClick(final View v) {
+					EditText etKeyword = (EditText) searchDialog
+						.findViewById(R.id.keyword);
+					WebHelper wh = new WebHelper();
+					if(wh.Request(getString(R.string.url) + "?action=search&keyword=" + etKeyword.getText(),
+							list) == false) {
+						showAlert("Error", R.drawable.about, "Connect time out!", "OK", true);
+					} else {
+						if(list.size()>0) {
+							isa.notifyDataSetChanged();
+						} else {
+							showAlert("Information", R.drawable.about, "Here is no map available!", "OK", true);					
+						}
+					}
+
+					searchDialog.dismiss();
 				}
-			}
+			});
+
+			Button bCancel = (Button) searchDialog
+					.findViewById(R.id.cancel);
+			bCancel.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					searchDialog.cancel();
+				}
+			});
+
+			searchDialog.show();
 			break;
 		}
 		return true;

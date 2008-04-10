@@ -227,7 +227,8 @@ public class SharePathMap extends MapActivity {
 				}
 			}
 			
-		}else {
+		} else {
+			Log.v(LOG_TAG, "normal start");
 			// 重新定位地图到当前位置
 			mc.centerMapTo(new Point((int) (l.getLatitude() * 1e6), (int) (l
 					.getLongitude() * 1e6)), true);
@@ -660,6 +661,7 @@ public class SharePathMap extends MapActivity {
 
 					url += "&center=" + mv.getMapCenter().getLatitudeE6()
 						+ INNER_SEPARATER + mv.getMapCenter().getLongitudeE6();
+					Log.v(LOG_TAG, url);
 					
 					WebHelper wh = new WebHelper();
 					if(wh.Request(url) == false) {

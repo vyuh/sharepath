@@ -33,7 +33,7 @@ public class Inbox extends ListActivity {
 		// Used to map notes entries from the database to views
 		adapter = new SimpleCursorAdapter(this,
 				R.layout.inbox_list, mCursor, new String[] {
-						Domain.Message.FROM, Domain.Message.END, Domain.Message.START }, new int[] {
+						Domain.Message.FROM, Domain.Message.START, Domain.Message.END }, new int[] {
 						R.id.image, R.id.text1, R.id.text2 });
 		adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder(){
 
